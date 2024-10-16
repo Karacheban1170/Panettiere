@@ -18,16 +18,14 @@ public class PanificioGioco extends JFrame {
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         // setUndecorated(true); // Rimuovere bordi della finestra
 
-        panificio = new Panificio();
-
         // Thread panettiereThread = new Thread(new Panettiere(panificio));
         // Thread clienteThread = new Thread(new Cliente(panificio));
 
         // panettiereThread.start();
         // clienteThread.start();
 
-        PanificioPanello panello = new PanificioPanello();
-        add(panello);
+        Panificio panificioPanello = new Panificio();
+        add(panificioPanello);
     }
 
     public static void main(String[] args) {
