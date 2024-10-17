@@ -10,10 +10,11 @@ import java.util.ArrayList;
 
 public class Panificio extends JPanel {
 
+    private Cliente cliente = new Cliente(this);;
     private BufferedImage panettiereImage;
     private BufferedImage sfondoImage;
     private BufferedImage banconeImage;
-    private boolean inSecondaScena = false;
+    private boolean isSecondaScena = false;
 
     private int panettiereX = 500; // Posizione iniziale del panettiere
     private int panettiereY = 200; // Altezza fissa del panettiere
@@ -25,10 +26,16 @@ public class Panificio extends JPanel {
     private boolean movimentoSinistra = false;
 
     // Definire il rettangolo-collider del bancone (posizione e dimensioni)
-    private Rectangle banconeRettangolo = new Rectangle(400, 435, 520, 130);
+    private Rectangle colliderBancone = new Rectangle(400, 435, 520, 130);
+
+    private ArrayList<Rectangle> colliderProdotti = new ArrayList<>();
 
     public Panificio() {
 
+        
+        Thread clienteThread = new Thread(cliente);
+        clienteThread.start();
+        
         try {
             sfondoImage = ImageIO.read(new File("img/panificio_sfondo.jpg"));
             banconeImage = ImageIO.read(new File("img/panificio_bancone.png"));
@@ -40,17 +47,36 @@ public class Panificio extends JPanel {
         setFocusable(true); // Imposta il pannello come focus per la tastiera
         requestFocusInWindow();
 
-        // MouseListener per cambiare scena quando il panettiere è sulla bancone
+        // Inizializza MouseAdapter e KeyListener
+        initMouseAndKeyListener();
+    }
+
+    private void initMouseAndKeyListener() {
+        // MouseAdapter per entrambe le scene
         addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                // Verifica se il panettiere è in collisione con il rettangolo verde (bancone)
-                Rectangle panettiereRettangolo = new Rectangle(panettiereX, panettiereY, panettiereWidth - 150, panettiereHeight);
+                if (isSecondaScena) {
+                    // Verifica se il clic è su uno dei prodotti
+                    for (Rectangle colliderProdotto : colliderProdotti) {
+                        if (colliderProdotto.contains(e.getPoint())) {
+                            // Esegui la logica dell'acquisto
+                            System.out.println("Prodotto selezionato! Cliente può tornare indietro.");
+                            if (cliente != null && cliente.isFermo()) {
+                                cliente.acquistaProdotto(); // Il cliente torna indietro
+                            }
+                            break;
+                        }
+                    }
+                } else {
+                    // Verifica se il panettiere è in collisione con il bancone
+                    Rectangle colliderPanettiere = new Rectangle(panettiereX, panettiereY, panettiereWidth - 150,
+                            panettiereHeight);
 
-                if (banconeRettangolo.intersects(panettiereRettangolo)) {
-                    // Verifica se il click è avvenuto all'interno del rettangolo verde
-                    if (SwingUtilities.isLeftMouseButton(e) && banconeRettangolo.contains(e.getPoint())) {
-                        inSecondaScena = true;
+                    if (colliderBancone.intersects(colliderPanettiere)) {
+                        if (SwingUtilities.isLeftMouseButton(e) && colliderBancone.contains(e.getPoint())) {
+                            isSecondaScena = true;
+                        }
                     }
                 }
                 repaint(); // Ridisegna il pannello per mostrare la seconda scena
@@ -62,13 +88,12 @@ public class Panificio extends JPanel {
             @Override
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_A) {
-                    // Muovi il panettiere a sinistra
                     movimentoSinistra = true;
                     panettiereX = Math.max(panettiereX - PANETTIERE_VELOCITA, 0); // Limiti a sinistra
                 } else if (e.getKeyCode() == KeyEvent.VK_D) {
-                    // Muovi il panettiere a destra
                     movimentoSinistra = false;
-                    panettiereX = Math.min(panettiereX + PANETTIERE_VELOCITA, getWidth() - 100); // Limiti a destra
+                    panettiereX = Math.min(panettiereX + PANETTIERE_VELOCITA, getWidth() - panettiereWidth); // Limiti a
+                                                                                                             // destra
                 }
                 repaint(); // Ridisegna il panettiere nella nuova posizione
             }
@@ -76,20 +101,18 @@ public class Panificio extends JPanel {
     }
 
     private void panificioPanello(Graphics2D g2d) {
-
         g2d.drawImage(sfondoImage, 0, 0, getWidth(), getHeight(), null);
+        
 
         // Salva la trasformazione originale
         AffineTransform trasformazioneOriginale = g2d.getTransform();
 
         // Verifica se il panettiere si sta muovendo a sinistra
         if (movimentoSinistra) {
-            // Applicare una riflessione orizzontale per il movimento a sinistra
             g2d.translate(panettiereX + panettiereWidth, panettiereY); // Posizionare il panettiere
             g2d.scale(-1, 1); // Riflettere orizzontalmente
             g2d.drawImage(panettiereImage, 0, 0, panettiereWidth, panettiereHeight, null);
         } else {
-            // Disegnare il panettiere normalmente
             g2d.drawImage(panettiereImage, panettiereX, panettiereY, panettiereWidth, panettiereHeight, null);
         }
 
@@ -98,36 +121,19 @@ public class Panificio extends JPanel {
 
         g2d.drawImage(banconeImage, 0, 0, getWidth(), getHeight(), null);
 
-        /// Disegna il rettangolo del bancone
-
-        // g2d.drawRect(banconeRettangolo.x, banconeRettangolo.y,
-        // banconeRettangolo.width,
-        // banconeRettangolo.height);
-
-        /// Cambia il colore del bancone se il panettiere collide con essa
-
-        // Rectangle panettiereRettangolo = new Rectangle(panettiereX, panettiereY,
-        // panettiereWidth - 100,
-        // panettiereHeight);
-        // if (banconeRettangolo.intersects(panettiereRettangolo)) {
-        // g2d.setColor(Color.GREEN); // Cambia colore se c'è una collisione
-        // g2d.fillRect(banconeRettangolo.x, banconeRettangolo.y,
-        // banconeRettangolo.width,
-        // banconeRettangolo.height);
-        // }
-
-        // Gestione bordi trasparenti (limita il panettiere all'interno della scena)
-        if (panettiereX < 150) {
-            panettiereX = 150; // Limite sinistro
-        } else if (panettiereX + 330 > getWidth()) {
-            panettiereX = getWidth() - 330; // Limite destro
+        // Gestione bordi (fermare il panettiere completamente ai limiti)
+        if (panettiereX <= 0) {
+            panettiereX = 0;
+        } else if (panettiereX + panettiereWidth >= getWidth()) {
+            panettiereX = getWidth() - panettiereWidth;
         }
     }
 
-    private void banconePanello(Graphics g2d) {
-        g2d.setColor(Color.DARK_GRAY);
-        int banconeAltezza = 200;
-        g2d.fillRect(0, getHeight() - banconeAltezza, getWidth(), banconeAltezza);
+    private void banconePanello(Graphics2D g2d) {
+
+
+        
+        
 
         // Dimensioni e spaziatura dei prodotti
         int prodottoWidth = 80;
@@ -139,6 +145,8 @@ public class Panificio extends JPanel {
         int startX = (getWidth() - totalWidth) / 2;
 
         ArrayList<BufferedImage> prodottiImages = new ArrayList<>();
+        colliderProdotti.clear();
+
         try {
             prodottiImages.add(ImageIO.read(new File("img/ciambella1.png")));
             prodottiImages.add(ImageIO.read(new File("img/muffin1.png")));
@@ -148,14 +156,21 @@ public class Panificio extends JPanel {
             e.printStackTrace();
         }
 
+        // Creazione del bancone
+        g2d.setColor(Color.DARK_GRAY);
+        int banconeAltezza = 200;
+        g2d.fillRect(0, getHeight() - banconeAltezza, getWidth(), banconeAltezza);
+
         for (int i = 0; i < prodottiImages.size(); i++) {
             int x = startX + i * (prodottoWidth + spacing);
+            int y = getHeight() - banconeAltezza + 50;
 
             if (prodottiImages.get(i) != null) {
-                g2d.drawImage(prodottiImages.get(i), x, getHeight() - banconeAltezza + 50, prodottoWidth,
-                        prodottoHeight,
-                        null);
+                g2d.drawImage(prodottiImages.get(i), x, y, prodottoWidth, prodottoHeight, null);
             }
+
+            // Aggiungi i rettangoli collider per i prodotti
+            colliderProdotti.add(new Rectangle(x, y, prodottoWidth, prodottoHeight));
         }
     }
 
@@ -164,14 +179,14 @@ public class Panificio extends JPanel {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
 
-        if (inSecondaScena) {
+        if (isSecondaScena) {
             // Seconda scena (bancone)
+            cliente.disegnaCliente(g2d);
             banconePanello(g2d);
-
+            
         } else {
             // Prima scena (panificio)
             panificioPanello(g2d);
         }
     }
-
 }

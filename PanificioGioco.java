@@ -3,15 +3,13 @@ import java.awt.*;
 
 public class PanificioGioco extends JFrame {
 
-    private Panificio panificio;
+    private Panificio panificioPanello;
 
     public PanificioGioco() {
         setTitle("Panificio");
 
         setSize(800, 600);
-
         setResizable(false);
-
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         // Impostare la finestra a schermo intero
@@ -20,12 +18,11 @@ public class PanificioGioco extends JFrame {
 
         // Thread panettiereThread = new Thread(new Panettiere(panificio));
         // Thread clienteThread = new Thread(new Cliente(panificio));
-
         // panettiereThread.start();
         // clienteThread.start();
 
-        Panificio panificioPanello = new Panificio();
-        add(panificioPanello);
+        panificioPanello = new Panificio();
+        setContentPane(panificioPanello);
     }
 
     public static void main(String[] args) {
