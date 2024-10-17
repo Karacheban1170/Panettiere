@@ -3,15 +3,13 @@ import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.Random;
-
 import javax.imageio.ImageIO;
 
 public class Cliente extends Thread {
 
     // Caratteristiche del cliente
     private static final int CLIENTE_VELOCITA = 20;
-    private int clienteX = -200; // Inizia fuori dalla schermata
+    private int clienteX = -300; // Inizia fuori dalla schermata
     private int clienteY = 200; // Altezza del cliente (a livello della banchina)
     private int clienteWidth = 300;
     private int clienteHeight = 600;
@@ -21,9 +19,11 @@ public class Cliente extends Thread {
     private String nome;
 
     private PanificioGUI panificio;
+    private PanificioMonitor panificioMonitor;
     private BufferedImage clienteImage;
 
-    public Cliente(PanificioGUI panificio, String nome) {
+    public Cliente(PanificioGUI panificio, PanificioMonitor panificioMonitor, String nome) {
+        this.panificioMonitor = panificioMonitor;
         this.panificio = panificio;
         this.nome = nome;
         try {
@@ -38,8 +38,12 @@ public class Cliente extends Thread {
         movimentoSinistra = true; // Cambia direzione dopo l'acquisto
     }
 
-    public void muoviCliente(){
+    @Override
+    public void run() {
+        panificioMonitor.enterPanificio(nome); // Cliente entra nel panificio
+        System.out.println("Cliente " + nome + " si trova nel panificio");
         while (true) {
+
             int centroDelBancone = (panificio.getWidth() / 2) - (clienteWidth / 2);
             if (!fermo) {
                 if (!movimentoSinistra) {
@@ -51,13 +55,15 @@ public class Cliente extends Thread {
                 } else {
                     // Muovi il cliente verso l'uscita (lato sinistro)
                     clienteX = Math.max(clienteX - CLIENTE_VELOCITA, -clienteWidth);
-                    if (clienteX < -clienteWidth) {
-                        // Il cliente è uscito dallo schermo
+                    if (clienteX == -300) {
+                        panificioMonitor.exitPanificio(nome);
                         break;
                     }
                 }
             }
-            panificio.repaint();
+
+            panificio.repaint(); // Ridisegna il panificio
+
             try {
                 Thread.sleep(100); // Rallenta il movimento per renderlo più fluido
             } catch (InterruptedException e) {
@@ -66,23 +72,8 @@ public class Cliente extends Thread {
         }
     }
 
-    @Override
-    public void run() {
-
-        PanificioMonitor.enterPanificio(nome);
-
-        try {
-            System.out.println("Turista " + nome + " si trova nel panificio");
-        } catch (InterruptedException e) {
-            System.out.println(e);
-        }
-
-        PanificioMonitor.exitPanificio(nome);
-
-    }
-
+    // Cliente esce dal panificio
     public void disegnaCliente(Graphics2D g2d) {
-
         if (movimentoSinistra) {
             // Riflettere l'immagine del cliente quando si muove a sinistra
             AffineTransform trasformazioneOriginale = g2d.getTransform();
@@ -99,4 +90,5 @@ public class Cliente extends Thread {
     public boolean isFermo() {
         return fermo;
     }
+
 }

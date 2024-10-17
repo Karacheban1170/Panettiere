@@ -1,18 +1,19 @@
-import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import javax.imageio.ImageIO;
 import java.io.IOException;
 import java.util.ArrayList;
+import javax.imageio.ImageIO;
+import javax.swing.*;
 
 public class PanificioGUI extends JPanel {
 
     private PanificioMonitor panificioMonitor = new PanificioMonitor();
-    private ArrayList<Cliente> clienti = new ArrayList<>(5);
+
     private Panettiere panettiere = new Panettiere(this);
+    private ArrayList<Cliente> clienti = new ArrayList<>();
+    // private Cliente cliente = new Cliente(this, new PanificioMonitor(), "Marco");
 
     private BufferedImage sfondoImage;
     private BufferedImage banconeImage;
@@ -26,7 +27,13 @@ public class PanificioGUI extends JPanel {
     public PanificioGUI() {
 
         System.out.println("Panificio apre");
-        
+        // Crea 5 clienti (puoi modificare il numero secondo necessità)
+        for (int i = 0; i < 5; i++) {
+            Cliente nuovoCliente = new Cliente(this, panificioMonitor, "Cliente" + (i + 1));
+            clienti.add(nuovoCliente);
+        }
+        // cliente.start();
+
         try {
             sfondoImage = ImageIO.read(new File("img/panificio_sfondo.jpg"));
             banconeImage = ImageIO.read(new File("img/panificio_bancone.png"));
@@ -39,6 +46,7 @@ public class PanificioGUI extends JPanel {
 
         // Inizializza MouseAdapter e KeyListener
         initMouseAndKeyListener();
+
     }
 
     private void initMouseAndKeyListener() {
@@ -48,15 +56,18 @@ public class PanificioGUI extends JPanel {
             public void mousePressed(MouseEvent e) {
                 if (isSecondaScena) {
                     // Verifica se il clic è su uno dei prodotti
-                    for (Rectangle colliderProdotto : colliderProdotti) {
-                        if (colliderProdotto.contains(e.getPoint())) {
-                            // Esegui la logica dell'acquisto
-                            Cliente ultimoCliente = clienti.get(clienti.size() - 1);
-                            System.out.println("Prodotto selezionato! Cliente può tornare indietro.");
-                            if (ultimoCliente != null && ultimoCliente.isFermo()) {
-                                ultimoCliente.acquistaProdotto(); // Il cliente torna indietro
+                    // Itera sull'array di clienti per trovare chi può acquistare
+                    for (Cliente cliente : clienti) {
+                        if (cliente != null && cliente.isFermo()) {
+                            // Verifica se il clic del mouse è su uno dei prodotti
+                            for (Rectangle colliderProdotto : colliderProdotti) {
+                                if (colliderProdotto.contains(e.getPoint())) {
+                                    // Logica dell'acquisto
+                                    System.out.println("Prodotto selezionato! Cliente può tornare indietro.");
+                                    cliente.acquistaProdotto();
+                                    break;
+                                }
                             }
-                            break;
                         }
                     }
                 } else {
@@ -98,22 +109,7 @@ public class PanificioGUI extends JPanel {
     }
 
     private void banconePanello(Graphics2D g2d) {
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        Cliente nuovoCliente = new Cliente(this, "Marco");
-        nuovoCliente.start();
-        clienti.add(nuovoCliente);
-        try {
-            nuovoCliente.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        nuovoCliente.muoviCliente();
+        clienti.get(1).disegnaCliente(g2d);
 
         // Dimensioni e spaziatura dei prodotti
         int prodottoWidth = 80;
@@ -166,6 +162,26 @@ public class PanificioGUI extends JPanel {
         } else {
             // Prima scena (panificio)
             panificioPanello(g2d);
+        }
+    }
+
+    public void avviaClienti() {
+
+        for (int i = 0; i < clienti.size(); i++) {
+            if (clienti.get(i) != null) {
+                clienti.get(i).start();
+            }
+        }
+
+        for (int i = 0; i < clienti.size(); i++) {
+            if (clienti.get(i) != null) {
+                try {
+                    clienti.get(i).join();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+            }
         }
     }
 }
