@@ -1,27 +1,21 @@
 import javax.swing.*;
-import java.awt.*;
 
 public class PanificioGioco extends JFrame {
 
-    private Panificio panificioPanello;
+    private PanificioGUI panificioPanello;
 
     public PanificioGioco() {
         setTitle("Panificio");
 
         setSize(800, 600);
-        setResizable(false);
+        setResizable(true);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         // Impostare la finestra a schermo intero
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         // setUndecorated(true); // Rimuovere bordi della finestra
 
-        // Thread panettiereThread = new Thread(new Panettiere(panificio));
-        // Thread clienteThread = new Thread(new Cliente(panificio));
-        // panettiereThread.start();
-        // clienteThread.start();
-
-        panificioPanello = new Panificio();
+        panificioPanello = new PanificioGUI();
         setContentPane(panificioPanello);
     }
 

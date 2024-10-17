@@ -1,13 +1,15 @@
-import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.Random;
+
 import javax.imageio.ImageIO;
 
-public class Cliente implements Runnable {
+public class Cliente extends Thread {
 
+    // Caratteristiche del cliente
     private static final int CLIENTE_VELOCITA = 20;
     private int clienteX = -200; // Inizia fuori dalla schermata
     private int clienteY = 200; // Altezza del cliente (a livello della banchina)
@@ -16,11 +18,14 @@ public class Cliente implements Runnable {
     private boolean movimentoSinistra = false;
     private boolean fermo = false;
 
-    private Panificio panificio; // Collegamento alla classe principale
+    private String nome;
+
+    private PanificioGUI panificio;
     private BufferedImage clienteImage;
 
-    public Cliente(Panificio panificio) {
+    public Cliente(PanificioGUI panificio, String nome) {
         this.panificio = panificio;
+        this.nome = nome;
         try {
             clienteImage = ImageIO.read(new File("img/cliente1.png"));
         } catch (IOException e) {
@@ -33,8 +38,7 @@ public class Cliente implements Runnable {
         movimentoSinistra = true; // Cambia direzione dopo l'acquisto
     }
 
-    @Override
-    public void run() {
+    public void muoviCliente(){
         while (true) {
             int centroDelBancone = (panificio.getWidth() / 2) - (clienteWidth / 2);
             if (!fermo) {
@@ -60,6 +64,21 @@ public class Cliente implements Runnable {
                 e.printStackTrace();
             }
         }
+    }
+
+    @Override
+    public void run() {
+
+        PanificioMonitor.enterPanificio(nome);
+
+        try {
+            System.out.println("Turista " + nome + " si trova nel panificio");
+        } catch (InterruptedException e) {
+            System.out.println(e);
+        }
+
+        PanificioMonitor.exitPanificio(nome);
+
     }
 
     public void disegnaCliente(Graphics2D g2d) {
