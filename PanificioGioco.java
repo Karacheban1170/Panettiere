@@ -6,12 +6,12 @@ public class PanificioGioco extends JFrame {
 
     public PanificioGioco() {
         setTitle("Panificio");
-        setSize(800, 600);
+        setSize(1366, 768);
         setResizable(true);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         // Impostare la finestra a schermo intero
-        setExtendedState(JFrame.MAXIMIZED_BOTH);
+        // setExtendedState(JFrame.MAXIMIZED_BOTH);
         // setUndecorated(true); // Rimuovere bordi della finestra
 
         setContentPane(panificioPanello);

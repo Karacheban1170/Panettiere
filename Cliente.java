@@ -22,12 +22,12 @@ public class Cliente extends Thread {
     private PanificioMonitor panificioMonitor;
     private BufferedImage clienteImage;
 
-    public Cliente(PanificioGUI panificio, PanificioMonitor panificioMonitor, String nome) {
+    public Cliente(PanificioGUI panificio, File clienteFile, PanificioMonitor panificioMonitor, String nome) {
         this.panificioMonitor = panificioMonitor;
         this.panificio = panificio;
         this.nome = nome;
         try {
-            clienteImage = ImageIO.read(new File("img/cliente1.png"));
+            clienteImage = ImageIO.read(clienteFile);
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -12,7 +12,7 @@ public class PanificioGUI extends JPanel {
     private PanificioMonitor panificioMonitor = new PanificioMonitor();
 
     private Panettiere panettiere = new Panettiere(this);
-    private ArrayList<Cliente> clienti = new ArrayList<>();
+    private ArrayList<Cliente> clienti = new ArrayList<>(2);
     // private Cliente cliente = new Cliente(this, new PanificioMonitor(), "Marco");
 
     private BufferedImage sfondoImage;
@@ -27,12 +27,14 @@ public class PanificioGUI extends JPanel {
     public PanificioGUI() {
 
         System.out.println("Panificio apre");
-        // Crea 5 clienti (puoi modificare il numero secondo necessità)
-        for (int i = 0; i < 5; i++) {
-            Cliente nuovoCliente = new Cliente(this, panificioMonitor, "Cliente" + (i + 1));
-            clienti.add(nuovoCliente);
-        }
-        // cliente.start();
+        // Crea 5 clienti
+        Cliente cliente1 = new Cliente(this, new File("img/cliente1.png"), panificioMonitor, "Cliente 1");
+        // Cliente cliente2 = new Cliente(this, new File("img/cliente2.png"), panificioMonitor, "Cliente 2");
+        // Cliente cliente3 = new Cliente(this, new File("img/cliente3.png"), panificioMonitor, "Cliente 3");
+
+        clienti.add(cliente1);
+        // clienti.add(cliente2);
+        // clienti.add(cliente3);
 
         try {
             sfondoImage = ImageIO.read(new File("img/panificio_sfondo.jpg"));
