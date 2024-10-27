@@ -24,7 +24,6 @@ public class PanificioGUI extends JFrame {
 
         initComponenti();
         initPannelli();
-
     }
 
     private void initComponenti() {
