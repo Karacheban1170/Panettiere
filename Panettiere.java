@@ -25,7 +25,7 @@ public class Panettiere extends Thread {
         try {
             panettiereImage = ImageIO.read(new File("img/panettiere.png"));
         } catch (IOException e) {
-            e.printStackTrace();
+            e.getMessage();
         }
     }
 
