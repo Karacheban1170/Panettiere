@@ -14,7 +14,6 @@ public class Panettiere extends JComponent {
     private Image panettiereImage;
 
     public Panettiere(String imgPath) {
-        setLocation(0, 500);
         panettiereImage = new ImageIcon(imgPath).getImage();
         setPreferredSize(new Dimension(panettiereWidth, panettiereHeight));
     }

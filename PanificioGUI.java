@@ -1,25 +1,19 @@
-import java.awt.BorderLayout;
-import java.awt.CardLayout;
-import java.awt.Graphics;
-import java.awt.Image;
+import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
+import javax.swing.*;
 
 public class PanificioGUI extends JFrame {
 
     private JButton toPnlMain, toPnlBancone;
-    private PanificioPanel pnlMain, pnlBancone;
+    private PanificioPanel pnlMain;
+    private BanconePanel bancone;
 
     private Panettiere panettiere;
 
     public PanificioGUI() {
         super("Panificio");
 
-        // setResizable(false);
         setSize(800, 600);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -33,37 +27,50 @@ public class PanificioGUI extends JFrame {
         initComponenti();
         initPannelli();
         initAscoltatori();
-
     }
 
     private void initComponenti() {
-        setLayout(new BorderLayout());
         toPnlBancone = new JButton("Vai al secondo pannello");
-        toPnlBancone.addActionListener(new ChangeContentPaneListener("pnlBancone"));
+        toPnlBancone.addActionListener(e -> showPanel(bancone));
 
         toPnlMain = new JButton("Torna al pannello principale");
-        toPnlMain.addActionListener(new ChangeContentPaneListener("pnlMain"));
+        toPnlMain.addActionListener(e -> showPanel(pnlMain));
 
         panettiere = new Panettiere("img/panettiere.png");
-        panettiere.setLocation(0, 10);
+        bancone = new BanconePanel("img/bancone_sfondo.jpg", "img/bancone.png"); // Usa le due immagini
     }
 
     private void initPannelli() {
-        setLayout(new CardLayout());
+        setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.weightx = 1;
+        gbc.weighty = 1;
 
         pnlMain = new PanificioPanel("img/panificio_sfondo.jpg");
-        pnlBancone = new PanificioPanel("img/bancone_sfondo.jpg");
 
         pnlMain.add(panettiere);
         pnlMain.add(toPnlBancone);
 
-        pnlBancone.add(toPnlMain);
+        // Aggiungi il pannello principale
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.weighty = 0.8; // Imposta il peso per il pannello principale
+        add(pnlMain, gbc);
 
-        add(pnlMain, "pnlMain");
-        add(pnlBancone, "pnlBancone");
+        // Aggiungi il pannello del bancone sotto il pannello principale
+        gbc.gridy = 1;
+        gbc.weighty = 0.2; // Imposta il peso per il pannello del bancone
+        add(bancone, gbc);
 
         // Visualizza il pnlMain all'avvio
-        ((CardLayout) getContentPane().getLayout()).show(getContentPane(), "pnlMain");
+        showPanel(pnlMain);
+    }
+
+    private void showPanel(JPanel panelToShow) {
+        pnlMain.setVisible(false);
+        bancone.setVisible(false);
+        panelToShow.setVisible(true);
     }
 
     private void initAscoltatori() {
@@ -85,6 +92,28 @@ public class PanificioGUI extends JFrame {
         });
     }
 
+}
+
+class BanconePanel extends JPanel {
+
+    private Image backgroundImg;
+    private Image banconeImg;
+
+    public BanconePanel(String backgroundImgPath, String banconeImgPath) {
+        backgroundImg = new ImageIcon(backgroundImgPath).getImage();
+        banconeImg = new ImageIcon(banconeImgPath).getImage();
+    }
+
+    @Override
+    public void paintComponent(Graphics g) {
+        super.paintComponent(g);
+
+        // Disegna l'immagine di sfondo
+        g.drawImage(backgroundImg, 0, 0, getWidth(), getHeight(), this);
+
+        // Disegna l'immagine del bancone
+        g.drawImage(banconeImg, 0, getHeight() - banconeImg.getHeight(this), getWidth(), banconeImg.getHeight(this), this);
+    }
 }
 
 class PanificioPanel extends JPanel {
