@@ -7,7 +7,9 @@ public class PanificioGUI extends JFrame {
 
     private JButton toPnlMain, toPnlBancone;
     private PanificioPanel pnlMain;
-    private BanconePanel bancone;
+    private PanificioPanel pnlBanconeBackground;
+    private BanconePanel pnlBancone;
+    private Prodotto[] elencoProdotti;
 
     private Panettiere panettiere;
 
@@ -31,37 +33,40 @@ public class PanificioGUI extends JFrame {
 
     private void initComponenti() {
         toPnlBancone = new JButton("Vai al secondo pannello");
-        toPnlBancone.addActionListener(e -> showPanel(bancone));
+        toPnlBancone.addActionListener(e -> showPanel(pnlBancone));
 
         toPnlMain = new JButton("Torna al pannello principale");
         toPnlMain.addActionListener(e -> showPanel(pnlMain));
 
         panettiere = new Panettiere("img/panettiere.png");
-        bancone = new BanconePanel("img/bancone_sfondo.jpg", "img/bancone.png"); // Usa le due immagini
+        elencoProdotti = new Prodotto[5];
+
+        for (int i = 0; i <= 4; i++) {
+            elencoProdotti[i] = new Prodotto("img/prodotto" + i + ".png");
+        }
     }
 
     private void initPannelli() {
-        setLayout(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.fill = GridBagConstraints.BOTH;
-        gbc.weightx = 1;
-        gbc.weighty = 1;
+        setLayout(new BorderLayout());
 
         pnlMain = new PanificioPanel("img/panificio_sfondo.jpg");
+        pnlBanconeBackground = new PanificioPanel("img/bancone_sfondo.jpg");
+        
+        pnlBancone = new BanconePanel("img/bancone_sfondo.jpg", "img/bancone.png");
 
         pnlMain.add(panettiere);
         pnlMain.add(toPnlBancone);
 
-        // Aggiungi il pannello principale
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.weighty = 0.8; // Imposta il peso per il pannello principale
-        add(pnlMain, gbc);
 
-        // Aggiungi il pannello del bancone sotto il pannello principale
-        gbc.gridy = 1;
-        gbc.weighty = 0.2; // Imposta il peso per il pannello del bancone
-        add(bancone, gbc);
+        for (int i = 0; i <= 4; i++) {
+            pnlBancone.add(elencoProdotti[i]);
+        }
+
+        pnlBanconeBackground.add(pnlBancone);
+
+        // Aggiungi i pannelli con BorderLayout
+        add(pnlMain, BorderLayout.CENTER); // pannello principale al centro
+        add(pnlBanconeBackground, BorderLayout.SOUTH); // pannello bancone in basso
 
         // Visualizza il pnlMain all'avvio
         showPanel(pnlMain);
@@ -69,7 +74,7 @@ public class PanificioGUI extends JFrame {
 
     private void showPanel(JPanel panelToShow) {
         pnlMain.setVisible(false);
-        bancone.setVisible(false);
+        pnlBancone.setVisible(false);
         panelToShow.setVisible(true);
     }
 
