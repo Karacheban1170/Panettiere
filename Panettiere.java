@@ -1,62 +1,37 @@
 import java.awt.*;
 import java.awt.geom.AffineTransform;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
+import javax.swing.JComponent;
 
-public class Panettiere extends Thread {
+public class Panettiere extends JComponent {
 
-    // Caratteristiche del panettiere
-    private int panettiereX = 500; // Posizione iniziale del panettiere
-    private int panettiereY = 200; // Altezza fissa del panettiere
-    private int panettiereWidth = 250;
-    private int panettiereHeight = 410;
+    private int panettiereWidth = 200;
+    private int panettiereHeight = 300;
 
     private final int PANETTIERE_VELOCITA = 20;
-
     private boolean movimentoSinistra = false;
 
-    private PanificioGUI panificio; // Collegamento alla classe principale
-    private BufferedImage panettiereImage;
+    private Image panettiereImage;
 
-    public Panettiere(PanificioGUI panificio) {
-        this.panificio = panificio;
-        try {
-            panettiereImage = ImageIO.read(new File("img/panettiere.png"));
-        } catch (IOException e) {
-            e.getMessage();
-        }
+    public Panettiere(String imgPath) {
+        setLocation(0, 500);
+        panettiereImage = new ImageIcon(imgPath).getImage();
+        setPreferredSize(new Dimension(panettiereWidth, panettiereHeight));
     }
 
     @Override
-    public void run() {
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        Graphics2D g2d = (Graphics2D) g;
 
-    }
-
-    public synchronized void produrrePane() throws InterruptedException {
-        // while (pani.size() == CAPACITA) {
-        // System.out.println("Panificio pieno! Attesa...");
-        // wait();
-        // }
-
-        // pani.add("Pane");
-        // System.out.println("Panettiere: Pane prodotto!");
-        // notifyAll();
-    }
-
-    /**
-     * @return the panettiereX
-     */
-    public int getPanettiereX() {
-        return panettiereX;
-    }
-
-    /**
-     * @return the panettiereY
-     */
-    public int getPanettiereY() {
-        return panettiereY;
+        AffineTransform transform = g2d.getTransform();
+        if (movimentoSinistra) {
+            g2d.scale(-1, 1); // Inverte l'immagine orizzontalmente
+            g2d.drawImage(panettiereImage, -panettiereWidth, 0, panettiereWidth, panettiereHeight, this);
+        } else {
+            g2d.drawImage(panettiereImage, 0, 0, panettiereWidth, panettiereHeight, this);
+        }
+        g2d.setTransform(transform); // Ripristina la trasformazione originale
     }
 
     /**
@@ -73,33 +48,14 @@ public class Panettiere extends Thread {
         return panettiereHeight;
     }
 
-    /**
-     * @return the movimentoSinistra
-     */
-    public boolean isMovimentoSinistra() {
-        return movimentoSinistra;
-    }
-
     public void muoviSinistra() {
         movimentoSinistra = true;
-        panettiereX = Math.max(panettiereX - PANETTIERE_VELOCITA, 0);
+        setLocation(Math.max(getX() - PANETTIERE_VELOCITA, 0), this.getY());
     }
 
     public void muoviDestra() {
         movimentoSinistra = false;
-        panettiereX = Math.min(panettiereX + PANETTIERE_VELOCITA, panificio.getWidth() - panettiereWidth);
-    }
-
-    public void disegnaPanettiere(Graphics2D g2d) {
-        if (movimentoSinistra) {
-            AffineTransform originalTransform = g2d.getTransform(); // Salva lo stato originale
-            g2d.translate(panettiereX + panettiereWidth, panettiereY); // Posizionare il panettiere
-            g2d.scale(-1, 1); // Riflettere orizzontalmente
-            g2d.drawImage(panettiereImage, 0, 0, panettiereWidth, panettiereHeight, null);
-            g2d.setTransform(originalTransform); // Ripristina lo stato originale
-        } else {
-            g2d.drawImage(panettiereImage, panettiereX, panettiereY, panettiereWidth, panettiereHeight, null);
-        }
+        setLocation(Math.min(getX() + PANETTIERE_VELOCITA, getParent().getWidth() - panettiereWidth), this.getY());
     }
 
 }
