@@ -5,7 +5,7 @@ import javax.swing.*;
 public class PanificioGUI extends JFrame {
 
     private JPanel pnlMain;
-    private JLabel mainBackground;
+    private JLabel mainBackground, mainBancone;
     private JPanel mainOverlayPanel;
 
     private JPanel pnlBancone;
@@ -59,8 +59,10 @@ public class PanificioGUI extends JFrame {
 
     private void initComponenti() {
         mainBackground = new JLabel();
+        mainBancone = new JLabel();
         toPnlBancone = new JButton("Vai al secondo pannello");
         toPnlBancone.addActionListener(e -> showPanel("BanconePanel"));
+        
         panettiere = new Panettiere();
 
         banconeBackground = new JLabel();
@@ -74,9 +76,12 @@ public class PanificioGUI extends JFrame {
         pnlMain = new JPanel(new BorderLayout());
         mainOverlayPanel = new JPanel();
         mainOverlayPanel.setLayout(new OverlayLayout(mainOverlayPanel));
+        
         mainOverlayPanel.add(toPnlBancone);
+        
         mainOverlayPanel.add(panettiere);
         mainOverlayPanel.add(mainBackground);
+        mainOverlayPanel.add(mainBancone);
 
         pnlBancone = new JPanel(new BorderLayout());
         banconeOverlayPanel = new JPanel();
@@ -111,6 +116,8 @@ public class PanificioGUI extends JFrame {
         resizeImage(mainBackground, "img/panificio_sfondo.jpg", boundary);
 
         resizeImage(banconeBackground, "img/bancone_sfondo.jpg", boundary);
+
+        resizeImage(mainBancone, "img/panificio_bancone.jpg", boundary);
 
         resizeImage(panettiere, "img/panettiere.png", boundaryPanettiere);
     }
