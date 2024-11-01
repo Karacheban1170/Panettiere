@@ -1,7 +1,7 @@
 public class PanificioGioco {
 
     public static void main(String[] args) {
-        PanificioGUI frame = new PanificioGUI();
-        frame.setVisible(true);
+        Panificio mGame = new Panificio(960, 540);
+        mGame.start();
     }
 }

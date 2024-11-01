@@ -1,32 +1,43 @@
 import java.awt.*;
-import java.awt.geom.AffineTransform;
-import javax.swing.ImageIcon;
-import javax.swing.JLabel;
+import java.awt.event.*;
 
-public class Panettiere extends JLabel {
+public class Panettiere implements KeyListener {
+    protected int centroX;
+    protected int centroY;
+    private int larghezza;
+    private int altezza;
+    private Panificio game;
 
-    private int panettiereWidth = 200; // Larghezza originale
-    private int panettiereHeight = 300; // Altezza originale
-    private final int PANETTIERE_VELOCITA = 20; // Velocità di movimento
-    private boolean movimentoSinistra = false; // Direzione di movimento
-
-    public int getPanettiereWidth() {
-        return panettiereWidth;
+    public Panettiere(int width, int height, Panificio game) {
+        this.game = game;
+        this.larghezza = width;
+        this.altezza = height;
+        centroX = width / 2;
+        centroY = height - 50; // Posizione Y del panettiere
     }
 
-    public int getPanettiereHeight() {
-        return panettiereHeight;
+    public void panettiereFrame(Graphics g, int width, int height) {
+        g.setColor(Color.BLACK); // Colore del panettiere
+        g.fillRect(centroX - 15, centroY - 30, 30, 60); // Disegna il panettiere come un rettangolo
     }
 
-    public void muoviSinistra() {
-        movimentoSinistra = true;
-        setLocation(Math.max(getX() - PANETTIERE_VELOCITA, 0), this.getY());
-        repaint(); // Ridisegna il panettiere
+    @Override
+    public void keyPressed(KeyEvent e) {
+        int key = e.getKeyCode();
+        if (key == KeyEvent.VK_LEFT) {
+            if (centroX > 0) {
+                centroX -= 5; // Muove a sinistra
+            }
+        } else if (key == KeyEvent.VK_RIGHT) {
+            if (centroX < larghezza) {
+                centroX += 5; // Muove a destra
+            }
+        }
     }
 
-    public void muoviDestra() {
-        movimentoSinistra = false;
-        setLocation(Math.min(getX() + PANETTIERE_VELOCITA, getParent().getWidth() - (panettiereWidth / 4)), this.getY());
-        repaint(); // Ridisegna il panettiere
-    }
+    @Override
+    public void keyReleased(KeyEvent e) {}
+
+    @Override
+    public void keyTyped(KeyEvent e) {}
 }
