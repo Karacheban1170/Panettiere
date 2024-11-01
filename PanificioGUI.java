@@ -26,6 +26,7 @@ public class PanificioGUI extends JFrame {
 
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         setFocusable(true);
+        setResizable(false);
         requestFocusInWindow();
 
         cardLayout = new CardLayout();

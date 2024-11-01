@@ -2,9 +2,9 @@
 	"configurations": [
 		{
 			"type": "java",
-			"name": "PanificioGUI",
+			"name": "PanificioGioco",
 			"request": "launch",
-			"mainClass": "PanificioGUI",
+			"mainClass": "PanificioGioco",
 			"projectName": "Panificio_7fe1fc69"
 		},
 		{
@@ -13,13 +13,6 @@
 			"request": "launch",
 			"mainClass": "PanificioGioco",
 			"projectName": "Panificio_75314d91"
-		},
-		{
-			"type": "java",
-			"name": "PanificioGioco",
-			"request": "launch",
-			"mainClass": "PanificioGioco",
-			"projectName": "Panificio_7fe1fc69"
 		}
 	]
 }
