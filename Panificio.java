@@ -8,7 +8,8 @@ import javax.swing.*;
 
 public class Panificio extends JPanel implements Runnable, FocusListener, MouseListener {
 
-    private Thread updateThread;
+    private final Thread updateThread;
+    private boolean running = true;
 
     private final int width, height;
     private boolean focussed = false;
@@ -16,8 +17,7 @@ public class Panificio extends JPanel implements Runnable, FocusListener, MouseL
     private final Panettiere panettiere;
     private final BufferedImage bancone;
 
-    private Rectangle panettiereBounds;
-    private Rectangle banconeBounds;
+    private final Rectangle banconeBounds;
 
     private Cursor defaultCursor, selectCursor, transparentSelectCursor;
 
@@ -40,43 +40,11 @@ public class Panificio extends JPanel implements Runnable, FocusListener, MouseL
         updateThread.start();
     }
 
-    private BufferedImage loadImage(String path) {
-        try {
-            return ImageIO.read(new File(path));
-        } catch (IOException e) {
-            System.out.println(e.getMessage());
-            return null;
-        }
-    }
-
-    private void setCustomCursors() {
-        BufferedImage defaultCursorImage = loadImage("img/default_cursor.png");
-        BufferedImage selectCursorImage = loadImage("img/select_cursor.png");
-        BufferedImage transparentSelectCursorImage = loadImage("img/trasparent_select_cursor.png");
-
-        if (defaultCursorImage != null) {
-            defaultCursor = Toolkit.getDefaultToolkit().createCustomCursor(defaultCursorImage, new Point(0, 0),
-                    "Default Cursor");
-        }
-        if (selectCursorImage != null) {
-            selectCursor = Toolkit.getDefaultToolkit().createCustomCursor(selectCursorImage, new Point(0, 0),
-                    "Select Cursor");
-        }
-
-        // Crea il cursore trasparente
-        if (transparentSelectCursorImage != null) {
-            transparentSelectCursor = Toolkit.getDefaultToolkit().createCustomCursor(transparentSelectCursorImage,
-                    new Point(0, 0),
-                    "Transparent Select Cursor");
-        }
-        setCursor(defaultCursor);
-    }
-
     @Override
     public void run() {
-        while (true) {
+        while (running) {
             try {
-                Thread.sleep(16); 
+                Thread.sleep(16);
                 updateCursor();
                 repaint();
             } catch (InterruptedException e) {
@@ -84,6 +52,10 @@ public class Panificio extends JPanel implements Runnable, FocusListener, MouseL
                 break;
             }
         }
+    }
+
+    public void stop() {
+        running = false;
     }
 
     @Override
@@ -117,6 +89,15 @@ public class Panificio extends JPanel implements Runnable, FocusListener, MouseL
         }
     }
 
+    private BufferedImage loadImage(String path) {
+        try {
+            return ImageIO.read(new File(path));
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+            return null;
+        }
+    }
+
     private void paintIstruzioni(Graphics g) {
         g.setColor(Color.WHITE);
         g.setFont(new Font("Arial", Font.BOLD, 20));
@@ -135,26 +116,27 @@ public class Panificio extends JPanel implements Runnable, FocusListener, MouseL
         repaint();
     }
 
-    @Override
-    public void mousePressed(MouseEvent e) {
-        requestFocusInWindow();
-    }
+    private void setCustomCursors() {
+        BufferedImage defaultCursorImage = loadImage("img/default_cursor.png");
+        BufferedImage selectCursorImage = loadImage("img/select_cursor.png");
+        BufferedImage transparentSelectCursorImage = loadImage("img/trasparent_select_cursor.png");
 
-    @Override
-    public void mouseEntered(MouseEvent e) {
-    }
+        if (defaultCursorImage != null) {
+            defaultCursor = Toolkit.getDefaultToolkit().createCustomCursor(defaultCursorImage, new Point(0, 0),
+                    "Default Cursor");
+        }
+        if (selectCursorImage != null) {
+            selectCursor = Toolkit.getDefaultToolkit().createCustomCursor(selectCursorImage, new Point(0, 0),
+                    "Select Cursor");
+        }
 
-    @Override
-    public void mouseExited(MouseEvent e) {
+        // Crea il cursore trasparente
+        if (transparentSelectCursorImage != null) {
+            transparentSelectCursor = Toolkit.getDefaultToolkit().createCustomCursor(transparentSelectCursorImage,
+                    new Point(0, 0),
+                    "Transparent Select Cursor");
+        }
         setCursor(defaultCursor);
-    }
-
-    @Override
-    public void mouseClicked(MouseEvent e) {
-    }
-
-    @Override
-    public void mouseReleased(MouseEvent e) {
     }
 
     private void updateCursor() {
@@ -180,5 +162,31 @@ public class Panificio extends JPanel implements Runnable, FocusListener, MouseL
         return panettiere.getPanettiereBounds().intersects(banconeBounds);
     }
 
+    @Override
+    public void mousePressed(MouseEvent e) {
+        requestFocusInWindow();
+    }
+
+
+    @Override
+    public void mouseClicked(MouseEvent e) {
+        Point mousePosition = e.getPoint();
+        if (isMouseOverBancone(mousePosition)) {
+            // Simula il clic sul pulsante toPnlBancone
+            toPnlBancone.doClick(); // Questo attiverà l'azione del pulsante
+        }
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent e) {
+    }
+
+    @Override
+    public void mouseExited(MouseEvent e) {
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+    }
 
 }
