@@ -1,7 +1,8 @@
 public class PanificioGioco {
 
     public static void main(String[] args) {
-        Panificio mGame = new Panificio(960, 540);
+        PanificioFrame mGame = new PanificioFrame();
+        mGame.setVisible(true);
         mGame.start();
     }
 }
