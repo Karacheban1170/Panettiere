@@ -1,17 +1,13 @@
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
-import java.awt.Color;
 import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JPanel;
 
-public class PanificioFrame extends JFrame implements Runnable {
+public class PanificioFrame extends JFrame {
     private Panificio pnlPanificio;
-    private JPanel pnlBancone;
-    private JButton toPnlPanificio, toPnlBancone;
+    private Bancone pnlBancone;
+    private JButton toPnlPanificio;
     private final CardLayout cardLayout;
-    private Thread runner;
-
     private static final int WIDTH_FRAME = 960;
     private static final int HEIGHT_FRAME = 540;
 
@@ -31,47 +27,18 @@ public class PanificioFrame extends JFrame implements Runnable {
         showPanel("PnlPanificio");
     }
 
-    public void start() {
-        if (runner == null) {
-            runner = new Thread(this);
-            runner.start();
-        }
-    }
-
-    @Override
-    public void dispose() {
-        runner = null;
-        super.dispose();
-    }
-
-    @Override
-    public void run() {
-        Thread currentThread = Thread.currentThread();
-
-        while (runner == currentThread) {
-            try {
-                Thread.sleep(25);
-                pnlPanificio.repaint(); // Rinfresca il pannello principale
-            } catch (InterruptedException e) {
-                System.out.println(e);
-            }
-        }
-    }
-
     private void initComponenti() {
-        toPnlBancone = new JButton("Vai al pannello bancone");
-        toPnlBancone.addActionListener(e -> showPanel("PnlBancone"));
-
         toPnlPanificio = new JButton("Torna al pannello panificio");
         toPnlPanificio.addActionListener(e -> showPanel("PnlPanificio"));
     }
 
     private void initPanelli() {
-        pnlPanificio = new Panificio(WIDTH_FRAME, HEIGHT_FRAME);
-        pnlBancone = new JPanel();
-        pnlBancone.setBackground(Color.BLACK);
+        pnlPanificio = new Panificio(WIDTH_FRAME, HEIGHT_FRAME, e -> showPanel("PnlBancone"));
+        pnlPanificio.start();
+        
+        pnlBancone = new Bancone(WIDTH_FRAME, HEIGHT_FRAME, e -> showPanel("PnlPanificio"));
+        pnlBancone.start();
 
-        pnlPanificio.add(toPnlBancone, BorderLayout.CENTER);
         pnlBancone.add(toPnlPanificio, BorderLayout.CENTER);
 
         getContentPane().add(pnlPanificio, "PnlPanificio");
@@ -80,5 +47,8 @@ public class PanificioFrame extends JFrame implements Runnable {
 
     private void showPanel(String panelName) {
         cardLayout.show(getContentPane(), panelName);
+        if ("PnlPanificio".equals(panelName)) {
+            pnlPanificio.requestFocusInWindow();
+        }
     }
 }
