@@ -11,6 +11,8 @@ public class Panettiere implements KeyListener, Runnable {
     private boolean running = true;
     private final Image imgPanettiere;
 
+    private Rectangle panettiereBounds;
+
     public Panettiere(Panificio pnlPanificio) {
         this.imgPanettiere = Toolkit.getDefaultToolkit().getImage("img/panettiere.png");
         this.pnlPanificio = pnlPanificio;
@@ -24,6 +26,7 @@ public class Panettiere implements KeyListener, Runnable {
 
     public void disegnaPanettiere(Graphics g) {
         if (imgPanettiere != null) {
+            this.panettiereBounds = new Rectangle(centroX + 100, centroY, width - 199, height);
             g.drawImage(imgPanettiere, centroX, centroY, width, height, null);
         } else {
             g.setColor(Color.BLACK);
@@ -69,4 +72,40 @@ public class Panettiere implements KeyListener, Runnable {
     public void stop() {
         running = false;
     }
+
+    /**
+     * @return the centroX
+     */
+    public int getCentroX() {
+        return centroX;
+    }
+
+    /**
+     * @return the centroY
+     */
+    public int getCentroY() {
+        return centroY;
+    }
+
+    /**
+     * @return the width
+     */
+    public int getWidth() {
+        return width;
+    }
+
+    /**
+     * @return the height
+     */
+    public int getHeight() {
+        return height;
+    }
+
+    /**
+     * @return the panettiereBounds
+     */
+    public Rectangle getPanettiereBounds() {
+        return panettiereBounds;
+    }
+
 }

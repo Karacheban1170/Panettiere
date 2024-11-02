@@ -1,32 +1,95 @@
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import javax.imageio.ImageIO;
 import javax.swing.*;
 
-public class Panificio extends JPanel implements FocusListener, MouseListener {
+public class Panificio extends JPanel implements Runnable, FocusListener, MouseListener {
+
+    private Thread updateThread;
 
     private final int width, height;
     private boolean focussed = false;
-    private final Image sfondo;
+    private final BufferedImage sfondo;
     private final Panettiere panettiere;
-    private final Image bancone;
+    private final BufferedImage bancone;
 
-    
+    private Rectangle panettiereBounds;
+    private Rectangle banconeBounds;
+
+    private Cursor defaultCursor, selectCursor, transparentSelectCursor;
+
     public Panificio(int width, int height) {
         this.width = width;
         this.height = height;
-        this.sfondo = Toolkit.getDefaultToolkit().getImage("img/panificio_sfondo.jpg");
-        this.bancone = Toolkit.getDefaultToolkit().getImage("img/panificio_bancone.png");
+        this.sfondo = loadImage("img/panificio_sfondo.jpg");
+        this.bancone = loadImage("img/panificio_bancone.png");
         panettiere = new Panettiere(this);
+
+        banconeBounds = new Rectangle((width / 2) - 230, (height / 2) + 45, 400, 100);
 
         addKeyListener(panettiere);
         addFocusListener(this);
         addMouseListener(this);
-        setFocusable(true);
+
+        setCustomCursors();
+
+        updateThread = new Thread(this);
+        updateThread.start();
+    }
+
+    private BufferedImage loadImage(String path) {
+        try {
+            return ImageIO.read(new File(path));
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+            return null;
+        }
+    }
+
+    private void setCustomCursors() {
+        BufferedImage defaultCursorImage = loadImage("img/default_cursor.png");
+        BufferedImage selectCursorImage = loadImage("img/select_cursor.png");
+        BufferedImage transparentSelectCursorImage = loadImage("img/trasparent_select_cursor.png");
+
+        if (defaultCursorImage != null) {
+            defaultCursor = Toolkit.getDefaultToolkit().createCustomCursor(defaultCursorImage, new Point(0, 0),
+                    "Default Cursor");
+        }
+        if (selectCursorImage != null) {
+            selectCursor = Toolkit.getDefaultToolkit().createCustomCursor(selectCursorImage, new Point(0, 0),
+                    "Select Cursor");
+        }
+
+        // Crea il cursore trasparente
+        if (transparentSelectCursorImage != null) {
+            transparentSelectCursor = Toolkit.getDefaultToolkit().createCustomCursor(transparentSelectCursorImage,
+                    new Point(0, 0),
+                    "Transparent Select Cursor");
+        }
+        setCursor(defaultCursor);
+    }
+
+    @Override
+    public void run() {
+        while (true) {
+            try {
+                Thread.sleep(16); 
+                updateCursor();
+                repaint();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                break;
+            }
+        }
     }
 
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
+
         disegnaSfondo(g);
         panettiere.disegnaPanettiere(g);
         disegnaBancone(g);
@@ -50,12 +113,12 @@ public class Panificio extends JPanel implements FocusListener, MouseListener {
             g.drawImage(bancone, 0, 0, width, height, this);
         } else {
             g.setColor(Color.CYAN);
-            g.fillRect(0, 0, width, height);
+            g.fillRect(banconeBounds.x, banconeBounds.y, banconeBounds.width, banconeBounds.height);
         }
     }
 
     private void paintIstruzioni(Graphics g) {
-        g.setColor(Color.BLACK);
+        g.setColor(Color.WHITE);
         g.setFont(new Font("Arial", Font.BOLD, 20));
         g.drawString("Cliccare per iniziare!", width / 2 - 100, height / 2 - 100);
     }
@@ -78,6 +141,15 @@ public class Panificio extends JPanel implements FocusListener, MouseListener {
     }
 
     @Override
+    public void mouseEntered(MouseEvent e) {
+    }
+
+    @Override
+    public void mouseExited(MouseEvent e) {
+        setCursor(defaultCursor);
+    }
+
+    @Override
     public void mouseClicked(MouseEvent e) {
     }
 
@@ -85,11 +157,28 @@ public class Panificio extends JPanel implements FocusListener, MouseListener {
     public void mouseReleased(MouseEvent e) {
     }
 
-    @Override
-    public void mouseEntered(MouseEvent e) {
+    private void updateCursor() {
+        Point mousePosition = getMousePosition();
+        if (mousePosition != null) {
+            if (isMouseOverBancone(mousePosition)) {
+                if (isPanettiereIntersectsBancone(banconeBounds)) {
+                    setCursor(selectCursor);
+                } else {
+                    setCursor(transparentSelectCursor);
+                }
+            } else {
+                setCursor(defaultCursor);
+            }
+        }
     }
 
-    @Override
-    public void mouseExited(MouseEvent e) {
+    private boolean isMouseOverBancone(Point mousePoint) {
+        return banconeBounds.contains(mousePoint);
     }
+
+    private boolean isPanettiereIntersectsBancone(Rectangle banconeBounds) {
+        return panettiere.getPanettiereBounds().intersects(banconeBounds);
+    }
+
+
 }

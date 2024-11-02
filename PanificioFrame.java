@@ -1,3 +1,4 @@
+import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
 import javax.swing.JButton;
@@ -69,6 +70,9 @@ public class PanificioFrame extends JFrame implements Runnable {
         pnlPanificio = new Panificio(WIDTH_FRAME, HEIGHT_FRAME);
         pnlBancone = new JPanel();
         pnlBancone.setBackground(Color.BLACK);
+
+        pnlPanificio.add(toPnlBancone, BorderLayout.CENTER);
+        pnlBancone.add(toPnlPanificio, BorderLayout.CENTER);
 
         getContentPane().add(pnlPanificio, "PnlPanificio");
         getContentPane().add(pnlBancone, "PnlBancone");
