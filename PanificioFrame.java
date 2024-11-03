@@ -1,12 +1,9 @@
-import java.awt.BorderLayout;
 import java.awt.CardLayout;
-import javax.swing.JButton;
 import javax.swing.JFrame;
 
 public class PanificioFrame extends JFrame {
     private Panificio pnlPanificio;
     private Bancone pnlBancone;
-    private JButton toPnlPanificio;
     private final CardLayout cardLayout;
     private static final int WIDTH_FRAME = 960;
     private static final int HEIGHT_FRAME = 540;
@@ -21,25 +18,20 @@ public class PanificioFrame extends JFrame {
         cardLayout = new CardLayout();
         setLayout(cardLayout);
 
-        initComponenti();
         initPanelli();
 
         showPanel("PnlPanificio");
     }
 
-    private void initComponenti() {
-        toPnlPanificio = new JButton("Torna al pannello panificio");
-        toPnlPanificio.addActionListener(e -> showPanel("PnlPanificio"));
-    }
-
     private void initPanelli() {
-        pnlPanificio = new Panificio(WIDTH_FRAME, HEIGHT_FRAME, e -> showPanel("PnlBancone"));
-        pnlPanificio.start();
-        
         pnlBancone = new Bancone(WIDTH_FRAME, HEIGHT_FRAME, e -> showPanel("PnlPanificio"));
+        pnlPanificio = new Panificio(WIDTH_FRAME, HEIGHT_FRAME, e -> {
+            showPanel("PnlBancone"); 
+            pnlBancone.initClienti();
+        });
+        
         pnlBancone.start();
-
-        pnlBancone.add(toPnlPanificio, BorderLayout.CENTER);
+        pnlPanificio.start();
 
         getContentPane().add(pnlPanificio, "PnlPanificio");
         getContentPane().add(pnlBancone, "PnlBancone");

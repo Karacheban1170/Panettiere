@@ -6,7 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import javax.imageio.ImageIO;
 
-public class Panettiere implements KeyListener, Runnable {
+public class Panettiere implements KeyListener {
     private int centroX;
     private final int centroY;
     private final int width;
@@ -14,9 +14,6 @@ public class Panettiere implements KeyListener, Runnable {
     private static final int VELOCITA_PANETTIERE = 10;
     private final Panificio pnlPanificio;
     private final BufferedImage imgPanettiere;
-
-    private Thread newThread;
-    private boolean running = true;
 
     private boolean movimentoSinistra = false;
 
@@ -33,29 +30,6 @@ public class Panettiere implements KeyListener, Runnable {
         this.centroY = 140;
 
         this.panettiereBounds = new Rectangle(centroX + 100, centroY, width - 199, height);
-    }
-
-    @Override
-    public void run() {
-        while (running) {
-            try {
-                Thread.sleep(10);
-                pnlPanificio.repaint();
-            } catch (InterruptedException e) {
-                System.out.println("Thread interrotto: " + e.getMessage());
-            }
-        }
-    }
-
-    public synchronized void start() {
-        running = true;
-
-        newThread = new Thread(this);
-        newThread.start();
-    }
-
-    public synchronized void stop() {
-        running = false;
     }
 
     private BufferedImage loadImage(String path) {
