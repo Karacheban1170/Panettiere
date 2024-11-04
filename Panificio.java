@@ -193,6 +193,11 @@ public class Panificio extends JPanel implements Runnable, FocusListener, MouseL
                     "Transparent Select Cursor");
         }
         setCursor(defaultCursor);
+
+        // BufferedImage cursorImage = ImageIO.read(new File(percorsoImmagine)); 
+        // Cursor cursor = Toolkit.getDefaultToolkit().createCustomCursor(cursorImage, new Point(0, 0),
+        //             "Cursor Martello");
+        // setCursor(cursor)
     }
 
     private void updateCursor() {

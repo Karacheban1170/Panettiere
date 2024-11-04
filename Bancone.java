@@ -19,9 +19,11 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
 
     private final BufferedImage sfondo;
     private final BufferedImage bancone;
-    private final BufferedImage indietro;
+    private final BufferedImage btnIndietro;
+    private final BufferedImage btnForno;
 
-    private final Rectangle indietroBounds;
+    private final Rectangle btnIndietroBounds;
+    private final Rectangle btnFornoBounds;
 
     private ArrayList<Cliente> clienti;
 
@@ -31,21 +33,34 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
     };
 
     private final ActionListener toPnlPanificioAction;
+    private final ActionListener toPnlFornoAction;
 
     private Cursor defaultCursor, selectCursor, transparentSelectCursor;
+
+    private final MyProgressBar myProgressBar;
 
     public Bancone(int width, int height, ActionListener toPnlPanificioAction) {
         this.width = width;
         this.height = height;
         this.sfondo = loadImage("img/bancone_sfondo.jpg");
         this.bancone = loadImage("img/bancone.png");
-        this.indietro = loadImage("img/indietro.png");
+        this.btnIndietro = loadImage("img/btn_indietro.png");
+        this.btnForno = loadImage("img/btn_forno.png");
 
-        indietroBounds = new Rectangle(width - 215, 22, 180, 60);
+        btnIndietroBounds = new Rectangle(width - 215, 22, 180, 60);
+        btnFornoBounds = new Rectangle(width - 190, 385, 105, 105);
 
         this.toPnlPanificioAction = toPnlPanificioAction;
         addMouseListener(this);
         setCustomCursors();
+
+        // Inizializza la barra di progresso e aggiungila al pannello
+        myProgressBar = new MyProgressBar(0, 100);
+        myProgressBar.setPreferredSize(new Dimension(width / 2, 20));
+        myProgressBar.setProgressColor(new Color(0, 255, 0, 127));
+
+        // Avvia il timer per decrementare la barra di progresso
+        // createAndStartDecrementTimer();
     }
 
     @Override
@@ -89,7 +104,9 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
         }
 
         disegnaBancone(g2d);
-        disegnaIndietro(g2d);
+        disegnaBtnIndietro(g2d);
+        disegnaBtnForno(g2d);
+        disegnaProgressBar(g2d);
     }
 
     private void disegnaSfondo(Graphics2D g2d) {
@@ -110,14 +127,64 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
         }
     }
 
-    private void disegnaIndietro(Graphics2D g2d) {
-        if (indietro != null) {
-            g2d.drawImage(indietro, width - indietro.getWidth() - 40, 20, indietro.getWidth(), indietro.getHeight(),
+    private void disegnaBtnIndietro(Graphics2D g2d) {
+        if (btnIndietro != null) {
+            g2d.drawImage(btnIndietro, width - btnIndietro.getWidth() - 40, 20, btnIndietro.getWidth(),
+                    btnIndietro.getHeight(),
                     this);
         } else {
             g2d.setColor(Color.BLACK);
             g2d.fillRect(width - 40, 20, width, height);
         }
+    }
+
+    private void disegnaBtnForno(Graphics2D g2d) {
+        if (btnForno != null) {
+            g2d.drawImage(btnForno, width - btnForno.getWidth(), height - btnForno.getHeight(), 100, 100,
+                    this);
+        } else {
+            g2d.setColor(Color.BLACK);
+            g2d.fillRect(width - 40, 100, width, height);
+        }
+    }
+
+    private void disegnaProgressBar(Graphics2D g2d) {
+        int progressBarWidth = width / 2;
+        int progressBarHeight = 20;
+        int x = (width - progressBarWidth) / 2;
+        int y = 50;
+
+        // Disegna il contorno della barra di progresso
+        g2d.setColor(Color.BLACK);
+        g2d.drawRect(x, y, progressBarWidth, progressBarHeight);
+
+        // Calcola la larghezza riempita in base al valore corrente della barra di
+        // progresso
+        int filledWidth = (int) ((myProgressBar.getValue() / 100.0) * progressBarWidth);
+
+        // Disegna la parte riempita
+        g2d.setColor(myProgressBar.getProgressColor());
+        g2d.fillRect(x, y, filledWidth, progressBarHeight);
+    }
+
+    public void createAndStartDecrementTimer(int millisecondi) {
+        int delay = millisecondi / 100;
+
+        Timer progressBarCountDownTimer = new Timer(delay, new AbstractAction() {
+            int count = 100;
+
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                if (count == 0) {
+                    ((Timer) ae.getSource()).stop();
+                    System.out.println("Progress bar completata");
+                } else {
+                    count--;
+                    myProgressBar.setValue(count);
+                }
+            }
+        });
+        progressBarCountDownTimer.start();
     }
 
     private BufferedImage loadImage(String path) {
@@ -146,8 +213,6 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
         for (Thread th : threads) {
             th.start();
         }
-
-        
     }
 
     private void setCustomCursors() {
@@ -174,7 +239,7 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
     private void updateCursor() {
         Point mousePosition = getMousePosition();
         if (mousePosition != null) {
-            if (isMouseOverIndietro(mousePosition)) {
+            if (isMouseOverBtnIndietro(mousePosition)) {
                 if (panificioMonitor.isClientiEntrano() == false) {
                     setCursor(selectCursor);
                 } else {
@@ -186,8 +251,14 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
         }
     }
 
-    private boolean isMouseOverIndietro(Point mousePoint) {
-        return indietroBounds.contains(mousePoint);
+    private boolean isMouseOverBtn(Point mousePoint, Rectangle btnBounds) {
+        switch (btnbounds) {
+            case btnbounds == btnIndietroBounds:
+                return btnIndietroBounds.contains(mousePoint);
+                break;
+
+        }
+
     }
 
     @Override
@@ -203,9 +274,13 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
     public void mouseReleased(MouseEvent e) {
         if (e.getButton() == MouseEvent.BUTTON1) {
             Point mousePosition = e.getPoint();
-            if (isMouseOverIndietro(mousePosition)) {
+            if (isMouseOverBtn(mousePosition, btnIndietroBounds)) {
                 if (toPnlPanificioAction != null && panificioMonitor.isClientiEntrano() == false) {
                     toPnlPanificioAction.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, null));
+                }
+            }else if(isMouseOverBtn(mousePosition, btnFornoBounds)){
+                if (toPnlFornoAction != null) {
+                    toPnlFornoAction.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, null));
                 }
             }
         }

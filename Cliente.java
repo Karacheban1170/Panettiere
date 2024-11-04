@@ -8,6 +8,7 @@ public class Cliente implements Runnable {
     private final int width;
     private final int height;
     private String nome;
+    private int millisecondi;
     private static final int VELOCITA_CLIENTE = 10;
     private final Bancone pnlBancone;
     private final BufferedImage imgCliente;
@@ -23,21 +24,23 @@ public class Cliente implements Runnable {
         this.panificioMonitor = panificioMonitor;
         this.imgCliente = imgCliente;
         this.pnlBancone = pnlBancone;
+        this.millisecondi = 5000;
         this.width = 200;
         this.height = width + 150;
         this.x = -width - 50;
         this.y = 120;
         this.nome = nome;
+        
     }
 
     @Override
     public void run() {
         while (running) {
             entraCliente();
-
+            pnlBancone.createAndStartDecrementTimer(millisecondi);
             // Una volta entrato, il cliente si ferma e aspetta un momento
             try {
-                Thread.sleep(3000); // Simula l'azione del cliente all'interno del panificio
+                Thread.sleep(millisecondi); // Simula l'azione del cliente all'interno del panificio
             } catch (InterruptedException e) {
                 e.getMessage();
             }
