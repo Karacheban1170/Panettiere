@@ -1,21 +1,31 @@
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Image;
-import javax.swing.ImageIcon;
-import javax.swing.JComponent;
+import java.awt.image.BufferedImage;
 
-public class Prodotto extends JComponent{
+public class Prodotto {
+    private final BufferedImage immagine;
+    private int quantita;
 
-    private Image prodottoImage;
-
-    public Prodotto(String imgPath) {
-        prodottoImage = new ImageIcon(imgPath).getImage();
-        setPreferredSize(new Dimension(50, 50));
+    public Prodotto(BufferedImage immagine, int quantita) {
+        this.immagine = immagine;
+        this.quantita = quantita;
     }
 
-    @Override
-    public void paintComponent(Graphics g) {
-        super.paintComponent(g); // Chiama il metodo di superclasse
-        g.drawImage(prodottoImage, 0, 0, getWidth(), getHeight(), this); // Ridimensiona l'immagine
+    public BufferedImage getImage() {
+        return immagine;
     }
+
+    public int getQuantita() {
+        return quantita;
+    }
+
+    public void incrementaQuantita() {
+        quantita++;
+    }
+
+    public void decrementaQuantita() {
+        if (quantita > 0) {
+            quantita--;
+        }
+    }
+
+    
 }

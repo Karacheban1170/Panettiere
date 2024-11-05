@@ -13,7 +13,7 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
     private Thread updateThread;
     private boolean running = true;
 
-    private final PanificioMonitor panificioMonitor = new PanificioMonitor();
+    private PanificioMonitor panificioMonitor;
 
     private final int width, height;
 
@@ -21,11 +21,14 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
     private final BufferedImage bancone;
     private final BufferedImage btnIndietro;
     private final BufferedImage btnForno;
-
     private final Rectangle btnIndietroBounds;
     private final Rectangle btnFornoBounds;
 
     private ArrayList<Cliente> clienti;
+
+    private ArrayList<Prodotto> prodotti;
+    private ArrayList<Rectangle> prodottiBounds;
+    private final int quantita = 5;
 
     private final BufferedImage[] immaginiClienti = {
             loadImage("img/cliente1.png"),
@@ -37,9 +40,10 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
 
     private Cursor defaultCursor, selectCursor, transparentSelectCursor;
 
-    private final MyProgressBar myProgressBar;
+    private float blackOpacity = 1f;
+    private Timer fadeInTimer;
 
-    public Bancone(int width, int height, ActionListener toPnlPanificioAction) {
+    public Bancone(int width, int height, ActionListener toPnlPanificioAction, ActionListener toPnlFornoAction) {
         this.width = width;
         this.height = height;
         this.sfondo = loadImage("img/bancone_sfondo.jpg");
@@ -47,20 +51,23 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
         this.btnIndietro = loadImage("img/btn_indietro.png");
         this.btnForno = loadImage("img/btn_forno.png");
 
+        panificioMonitor = new PanificioMonitor();
+
+        prodotti = new ArrayList<>(4);
+        prodottiBounds = new ArrayList<>(prodotti.size());
+
+        this.prodotti.add(new Prodotto(loadImage("img/prodotto1.png"), quantita));
+        this.prodotti.add(new Prodotto(loadImage("img/prodotto2.png"), quantita));
+        this.prodotti.add(new Prodotto(loadImage("img/prodotto3.png"), quantita));
+        this.prodotti.add(new Prodotto(loadImage("img/prodotto4.png"), quantita));
+
         btnIndietroBounds = new Rectangle(width - 215, 22, 180, 60);
         btnFornoBounds = new Rectangle(width - 190, 385, 105, 105);
 
         this.toPnlPanificioAction = toPnlPanificioAction;
+        this.toPnlFornoAction = toPnlFornoAction;
         addMouseListener(this);
         setCustomCursors();
-
-        // Inizializza la barra di progresso e aggiungila al pannello
-        myProgressBar = new MyProgressBar(0, 100);
-        myProgressBar.setPreferredSize(new Dimension(width / 2, 20));
-        myProgressBar.setProgressColor(new Color(0, 255, 0, 127));
-
-        // Avvia il timer per decrementare la barra di progresso
-        // createAndStartDecrementTimer();
     }
 
     @Override
@@ -101,12 +108,22 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
 
         for (Cliente cliente : clienti) {
             cliente.disegnaCliente(g2d);
+            cliente.disegnaProdottoDesiderato(g2d);
+            cliente.disegnaProgressBar(g2d);
         }
 
         disegnaBancone(g2d);
+        disegnaProdotti(g2d);
         disegnaBtnIndietro(g2d);
         disegnaBtnForno(g2d);
-        disegnaProgressBar(g2d);
+
+        // Disegna un rettangolo nero semi-trasparente per il fading
+        g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, blackOpacity));
+        g2d.setColor(Color.BLACK);
+        g2d.fillRect(0, 0, width, height);
+
+        // Ripristina la trasparenza completa per il disegno normale
+        g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
     }
 
     private void disegnaSfondo(Graphics2D g2d) {
@@ -124,6 +141,29 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
         } else {
             g2d.setColor(Color.CYAN);
             g2d.fillRect(0, 355, width, height);
+        }
+    }
+
+    private void disegnaProdotti(Graphics2D g2d) {
+        int xPos = width / 2 - 180;
+        int yPos = 415;
+
+        for (int i = 0; i < prodotti.size(); i++) {
+            if (prodotti.get(i) != null) {
+                // Disegna il prodotto
+                g2d.drawImage(prodotti.get(i).getImage(), xPos, yPos, 50, 50, this);
+
+                // Aggiungi il Rectangle per il prodotto
+                prodottiBounds.add(new Rectangle(xPos, yPos, 50, 50));
+
+                // Disegna la quantità accanto al prodotto
+                g2d.setColor(Color.BLACK);
+                g2d.setFont(new Font("Arial", Font.BOLD, 16));
+                String quantitaStr = String.valueOf(prodotti.get(i).getQuantita());
+                g2d.drawString(quantitaStr, xPos + 55, yPos + 50);
+
+                xPos += 100;
+            }
         }
     }
 
@@ -148,45 +188,6 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
         }
     }
 
-    private void disegnaProgressBar(Graphics2D g2d) {
-        int progressBarWidth = width / 2;
-        int progressBarHeight = 20;
-        int x = (width - progressBarWidth) / 2;
-        int y = 50;
-
-        // Disegna il contorno della barra di progresso
-        g2d.setColor(Color.BLACK);
-        g2d.drawRect(x, y, progressBarWidth, progressBarHeight);
-
-        // Calcola la larghezza riempita in base al valore corrente della barra di
-        // progresso
-        int filledWidth = (int) ((myProgressBar.getValue() / 100.0) * progressBarWidth);
-
-        // Disegna la parte riempita
-        g2d.setColor(myProgressBar.getProgressColor());
-        g2d.fillRect(x, y, filledWidth, progressBarHeight);
-    }
-
-    public void createAndStartDecrementTimer(int millisecondi) {
-        int delay = millisecondi / 100;
-
-        Timer progressBarCountDownTimer = new Timer(delay, new AbstractAction() {
-            int count = 100;
-
-            @Override
-            public void actionPerformed(ActionEvent ae) {
-                if (count == 0) {
-                    ((Timer) ae.getSource()).stop();
-                    System.out.println("Progress bar completata");
-                } else {
-                    count--;
-                    myProgressBar.setValue(count);
-                }
-            }
-        });
-        progressBarCountDownTimer.start();
-    }
-
     private BufferedImage loadImage(String path) {
         try {
             return ImageIO.read(new File(path));
@@ -203,7 +204,7 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
 
         for (int i = 0; i < 3; i++) {
             Cliente cliente = new Cliente(immaginiClienti[rand.nextInt(immaginiClienti.length)], this,
-                    panificioMonitor, "Cliente" + (i + 1));
+                    panificioMonitor, "Cliente" + (i + 1), prodotti);
             clienti.add(cliente);
 
             Thread th = new Thread(cliente);
@@ -239,12 +240,14 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
     private void updateCursor() {
         Point mousePosition = getMousePosition();
         if (mousePosition != null) {
-            if (isMouseOverBtnIndietro(mousePosition)) {
+            if (isMouseOverBtn(mousePosition, btnIndietroBounds)) {
                 if (panificioMonitor.isClientiEntrano() == false) {
                     setCursor(selectCursor);
                 } else {
                     setCursor(transparentSelectCursor);
                 }
+            } else if (isMouseOverBtn(mousePosition, btnFornoBounds)) {
+                setCursor(selectCursor);
             } else {
                 setCursor(defaultCursor);
             }
@@ -252,18 +255,23 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
     }
 
     private boolean isMouseOverBtn(Point mousePoint, Rectangle btnBounds) {
-        switch (btnbounds) {
-            case btnbounds == btnIndietroBounds:
-                return btnIndietroBounds.contains(mousePoint);
-                break;
-
-        }
-
+        return btnBounds.contains(mousePoint);
     }
 
     @Override
     public void mouseClicked(MouseEvent e) {
         requestFocusInWindow();
+
+        Point mousePosition = e.getPoint();
+
+        // Controlla se il clic è su uno dei prodotti
+        for (int i = 0; i < prodottiBounds.size(); i++) {
+            if (prodottiBounds.get(i).contains(mousePosition)) {
+                prodotti.get(i).decrementaQuantita();
+                break;
+            }
+        }
+
     }
 
     @Override
@@ -278,9 +286,11 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
                 if (toPnlPanificioAction != null && panificioMonitor.isClientiEntrano() == false) {
                     toPnlPanificioAction.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, null));
                 }
-            }else if(isMouseOverBtn(mousePosition, btnFornoBounds)){
+
+            } else if (isMouseOverBtn(mousePosition, btnFornoBounds)) {
                 if (toPnlFornoAction != null) {
-                    toPnlFornoAction.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, null));
+                    toPnlFornoAction.actionPerformed(new ActionEvent(this,
+                            ActionEvent.ACTION_PERFORMED, null));
                 }
             }
         }
@@ -292,5 +302,21 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
 
     @Override
     public void mouseExited(MouseEvent e) {
+    }
+
+    public void fadingIn() {
+        fadeInTimer = new Timer(20, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                blackOpacity -= 0.05f; // Riduce l'opacità del nero
+                if (blackOpacity <= 0f) {
+                    blackOpacity = 0f; // Limita l'opacità al minimo
+                    fadeInTimer.stop();
+                }
+                repaint();
+            }
+        });
+        blackOpacity = 1f;
+        fadeInTimer.start();
     }
 }
