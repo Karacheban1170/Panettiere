@@ -247,6 +247,10 @@ public class Cliente implements Runnable {
         return clienteEntrato;
     }
 
+    public boolean isSoddisfatto(){
+        return soddisfatto;
+    }
+
     public int getClienteX() {
         return clienteX;
     }

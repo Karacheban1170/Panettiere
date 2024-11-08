@@ -47,7 +47,7 @@ public class Forno extends JPanel implements Runnable, MouseListener {
         while (running) {
             try {
                 Thread.sleep(10);
-                DynamicCursor.updateCursor(this, btnBanconeBounds);
+                DynamicCursor.updateCursor(this, btnBanconeBounds, ingredientiBounds);
                 repaint();
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -73,6 +73,8 @@ public class Forno extends JPanel implements Runnable, MouseListener {
         Graphics2D g2d = (Graphics2D) g;
 
         disegnaSfondo(g2d);
+
+        disegnaIngredienti(g2d);
         disegnaBtnBancone(g2d);
 
         FadingScene.disegnaFadingRect(g2d);
@@ -85,6 +87,23 @@ public class Forno extends JPanel implements Runnable, MouseListener {
         } else {
             g2d.setColor(Color.LIGHT_GRAY);
             g2d.fillRect(0, 0, width, height);
+        }
+    }
+
+    private void disegnaIngredienti(Graphics2D g2d) {
+        int xPos = width / 2 - 180;
+        int yPos = 415;
+
+        for (int i = 0; i < ingredienti.size(); i++) {
+            if (ingredienti.get(i) != null) {
+
+                // Aggiungi il Rectangle per il prodotto
+                ingredientiBounds.add(new Rectangle(xPos, yPos, 60, 60));
+
+                // Disegna il prodotto
+                g2d.drawImage(ingredienti.get(i).getImage(), xPos, yPos, 60, 60, this);
+                xPos += 100;
+            }
         }
     }
 

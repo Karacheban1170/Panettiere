@@ -59,7 +59,7 @@ public class DynamicCursor {
             // Determina in quale area si trova il mouse
             if (isMouseOverBounds(mousePosition, btnIndietroBounds)) {
                 area = "btnIndietro";
-            } else if (isMouseOverProdottiBounds(mousePosition, prodottiBounds)) {
+            } else if (isMouseOverArrayBounds(mousePosition, prodottiBounds)) {
                 area = "prodotti";
             } else if (isMouseOverBounds(mousePosition, btnFornoBounds)) {
                 area = "btnForno";
@@ -95,13 +95,32 @@ public class DynamicCursor {
     }
 
     // Metodo UpdateCursor per "Forno"
-    public static void updateCursor(JPanel panello, Rectangle btnBanconeBounds) {
+    public static void updateCursor(JPanel panello, Rectangle btnBanconeBounds,
+            ArrayList<Rectangle> ingredientiBounds) {
         Point mousePosition = panello.getMousePosition();
         if (mousePosition != null) {
+            String area = "";
+
+            // Determina in quale area si trova il mouse
             if (isMouseOverBounds(mousePosition, btnBanconeBounds)) {
-                panello.setCursor(selectCursor);
-            } else {
-                panello.setCursor(defaultCursor);
+                area = "btnBancone";
+            } else if (isMouseOverArrayBounds(mousePosition, ingredientiBounds)) {
+                area = "ingredienti";
+            }
+
+            // Imposta il cursore in base all'area determinata
+            switch (area) {
+                case "btnBancone":
+                    panello.setCursor(selectCursor);
+                    break;
+
+                case "ingredienti":
+                    panello.setCursor(selectCursor);
+                    break;
+
+                default:
+                    panello.setCursor(defaultCursor);
+                    break;
             }
         }
     }
@@ -115,7 +134,7 @@ public class DynamicCursor {
         return bounds.contains(mousePoint);
     }
 
-    private static boolean isMouseOverProdottiBounds(Point mousePoint, ArrayList<Rectangle> prodottiBounds) {
+    private static boolean isMouseOverArrayBounds(Point mousePoint, ArrayList<Rectangle> prodottiBounds) {
         for (int i = 0; i < prodottiBounds.size(); i++) {
             if (prodottiBounds.get(i).contains(mousePoint)) {
                 return true;

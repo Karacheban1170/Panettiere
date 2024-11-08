@@ -22,7 +22,6 @@ public class PanificioFrame extends JFrame {
 
         initPanelli();
 
-        // pnlForno.fadingIn();
         showPanel("PnlPanificio");
     }
 

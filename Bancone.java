@@ -22,7 +22,7 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
     private final Rectangle btnFornoBounds;
 
     private ArrayList<Cliente> clienti;
-    private int numClienti;
+    private final int numClienti;
 
     private final ArrayList<Prodotto> prodotti;
     private final ArrayList<Rectangle> prodottiBounds;
@@ -206,7 +206,6 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        requestFocusInWindow();
         Point mousePosition = e.getPoint();
 
         // Controlla se il clic è su uno dei prodotti
