@@ -204,11 +204,7 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
         }
     }
 
-    @Override
-    public void mouseClicked(MouseEvent e) {
-        Point mousePosition = e.getPoint();
-
-        // Controlla se il clic è su uno dei prodotti
+    private void vendiProdotto(Point mousePosition) {
         for (int i = 0; i < prodottiBounds.size(); i++) {
             if (prodottiBounds.get(i).contains(mousePosition)) {
                 Prodotto prodottoSelezionato = prodotti.get(i);
@@ -222,8 +218,7 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
                             prodottoSelezionato.decrementaQuantita();
                             cliente.setSoddisfatto(true);
                             break;
-                        }
-                        else{
+                        } else {
                             prodottoSelezionato.decrementaQuantita();
                             cliente.setSoddisfatto(false);
                             break;
@@ -233,6 +228,9 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
                 break;
             }
         }
+    }
+    @Override
+    public void mouseClicked(MouseEvent e) {
     }
 
     @Override
@@ -254,6 +252,9 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
                             ActionEvent.ACTION_PERFORMED, null));
                 }
             }
+
+            vendiProdotto(mousePosition);
+
         }
     }
 

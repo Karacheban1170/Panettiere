@@ -27,13 +27,11 @@ public class Forno extends JPanel implements Runnable, MouseListener {
         this.sfondo = ImageLoader.loadImage("img/forno_sfondo.jpg");
         this.btnBancone = ImageLoader.loadImage("img/btn_bancone.png");
 
+        setLayout(null);
+
         ingredienti = new ArrayList<>(4);
         ingredientiBounds = new ArrayList<>(ingredienti.size());
-
-        ingredienti.add(new Prodotto(ImageLoader.loadImage("img/ingrediente1.png"), "acqua"));
-        ingredienti.add(new Prodotto(ImageLoader.loadImage("img/ingrediente2.png"), "farina"));
-        ingredienti.add(new Prodotto(ImageLoader.loadImage("img/ingrediente3.png"), "latte"));
-        ingredienti.add(new Prodotto(ImageLoader.loadImage("img/ingrediente4.png"), "uova"));
+        aggiungiIngredienti();
 
         btnBanconeBounds = new Rectangle(width - 181, 392, 105, 105);
         this.toPnlBanconeAction = toPnlBanconeAction;
@@ -67,6 +65,29 @@ public class Forno extends JPanel implements Runnable, MouseListener {
         running = false;
     }
 
+    private void aggiungiIngredienti() {
+        int startX = width / 2 - 180; // Coordinata iniziale x centrata dinamicamente
+        int yPos = 415; // Posizione fissa verticale
+
+        // Aggiungi ingredienti con posizioni calcolate dinamicamente
+        ingredienti.add(new Prodotto(ImageLoader.loadImage("img/ingrediente1.png"), "acqua"));
+        ingredienti.add(new Prodotto(ImageLoader.loadImage("img/ingrediente2.png"), "farina"));
+        ingredienti.add(new Prodotto(ImageLoader.loadImage("img/ingrediente3.png"), "latte"));
+        ingredienti.add(new Prodotto(ImageLoader.loadImage("img/ingrediente4.png"), "uova"));
+
+        int offsetX = 100; // Distanza orizzontale tra ingredienti
+        int currentX = startX;
+
+        for (Prodotto ingrediente : ingredienti) {
+            ingrediente.setBounds(currentX, yPos, 60, 60);
+            ingrediente.setFixedPositionBancone(new Point(currentX, yPos));
+
+            ingredientiBounds.add(ingrediente.getBounds());
+            add(ingrediente);
+            currentX += offsetX;
+        }
+    }
+
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -74,7 +95,9 @@ public class Forno extends JPanel implements Runnable, MouseListener {
 
         disegnaSfondo(g2d);
 
+        disegnaCornici(g2d);
         disegnaIngredienti(g2d);
+
         disegnaBtnBancone(g2d);
 
         FadingScene.disegnaFadingRect(g2d);
@@ -90,21 +113,50 @@ public class Forno extends JPanel implements Runnable, MouseListener {
         }
     }
 
+    private void disegnaCornici(Graphics2D g2d) {
+
+        Graphics2D g2dTrans = (Graphics2D) g2d.create();
+        g2dTrans.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.3f));
+        // Assumiamo che ingredienti contenga gli oggetti Prodotto
+        for (Prodotto ingrediente : ingredienti) {
+            // Cornice 1 - Forno 1
+            Rectangle forno1Frame = new Rectangle(ingrediente.getFixedPositionForno1().x,
+                    ingrediente.getFixedPositionForno1().y, 60, 60);
+            g2dTrans.setColor(Color.BLACK); // Colore nero per la prima cornice
+            g2dTrans.fill(forno1Frame);
+
+            // Cornice 2 - Forno 2
+            Rectangle forno2Frame = new Rectangle(ingrediente.getFixedPositionForno2().x,
+                    ingrediente.getFixedPositionForno2().y, 60, 60);
+            g2dTrans.setColor(Color.BLACK); // Colore nero per la seconda cornice
+            g2dTrans.fill(forno2Frame);
+        }
+
+        // Cornice Centrale (Rosso)
+        Rectangle centraleFrame = new Rectangle(width / 2 - 30, height / 2 + 30, 60, 60); // Posizione centrale
+        g2dTrans.setColor(Color.RED); // Colore rosso per la cornice centrale
+        g2dTrans.fill(centraleFrame);
+    }
+
     private void disegnaIngredienti(Graphics2D g2d) {
-        int xPos = width / 2 - 180;
-        int yPos = 415;
-
         for (int i = 0; i < ingredienti.size(); i++) {
-            if (ingredienti.get(i) != null) {
+            Prodotto ingrediente = ingredienti.get(i);
+            if (ingrediente.getImage() != null) {
+                Point location = ingrediente.getLocation();
 
-                // Aggiungi il Rectangle per il prodotto
-                ingredientiBounds.add(new Rectangle(xPos, yPos, 60, 60));
+                g2d.drawImage(ingrediente.getImage(), location.x, location.y, ingrediente.getWidth(),
+                        ingrediente.getHeight(), this);
 
-                // Disegna il prodotto
-                g2d.drawImage(ingredienti.get(i).getImage(), xPos, yPos, 60, 60, this);
-                xPos += 100;
+                if (i < ingredientiBounds.size()) {
+                    ingredientiBounds.get(i).setBounds(location.x, location.y, ingrediente.getWidth(),
+                            ingrediente.getHeight());
+                } else {
+                    ingredientiBounds.add(
+                            new Rectangle(location.x, location.y, ingrediente.getWidth(), ingrediente.getHeight()));
+                }
             }
         }
+
     }
 
     private void disegnaBtnBancone(Graphics2D g2d) {
@@ -124,7 +176,7 @@ public class Forno extends JPanel implements Runnable, MouseListener {
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        requestFocusInWindow();
+
     }
 
     @Override
@@ -144,6 +196,7 @@ public class Forno extends JPanel implements Runnable, MouseListener {
                     toPnlBanconeAction.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, null));
                 }
             }
+
         }
     }
 
