@@ -1,9 +1,7 @@
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import javax.imageio.ImageIO;
+import java.util.ArrayList;
 import javax.swing.*;
 
 public class Forno extends JPanel implements Runnable, MouseListener {
@@ -15,25 +13,34 @@ public class Forno extends JPanel implements Runnable, MouseListener {
 
     private final BufferedImage sfondo;
 
+    private final BufferedImage btnBancone;
     private final Rectangle btnBanconeBounds;
 
-    private ActionListener toPnlBanconeAction;
+    private final ActionListener toPnlBanconeAction;
 
-    private Cursor defaultCursor, selectCursor, transparentSelectCursor;
+    private final ArrayList<Prodotto> ingredienti;
+    private final ArrayList<Rectangle> ingredientiBounds;
 
-    private float blackOpacity = 1f; 
-    private Timer fadeInTimer;
 
     public Forno(int width, int height, ActionListener toPnlBanconeAction) {
         this.width = width;
         this.height = height;
-        this.sfondo = loadImage("img/panificio_sfondo.jpg");
+        this.sfondo = ImageLoader.loadImage("img/forno_sfondo.jpg");
+        this.btnBancone = ImageLoader.loadImage("img/btn_bancone.png");
 
-        btnBanconeBounds = new Rectangle((width / 2) - 230, (height / 2) + 45, 400, 100);
+        ingredienti = new ArrayList<>(4);
+        ingredientiBounds = new ArrayList<>(ingredienti.size());
 
+        ingredienti.add(new Prodotto(ImageLoader.loadImage("img/ingrediente1.png"), "acqua"));
+        ingredienti.add(new Prodotto(ImageLoader.loadImage("img/ingrediente2.png"), "farina"));
+        ingredienti.add(new Prodotto(ImageLoader.loadImage("img/ingrediente3.png"), "latte"));
+        ingredienti.add(new Prodotto(ImageLoader.loadImage("img/ingrediente4.png"), "uova"));
+
+        btnBanconeBounds = new Rectangle(width - 181, 392, 105, 105);
         this.toPnlBanconeAction = toPnlBanconeAction;
+
         addMouseListener(this);
-        setCustomCursors();
+        DynamicCursor.setCustomCursors(this);
     }
 
     @Override
@@ -41,7 +48,7 @@ public class Forno extends JPanel implements Runnable, MouseListener {
         while (running) {
             try {
                 Thread.sleep(10);
-                updateCursor();
+                DynamicCursor.updateCursor(this, btnBanconeBounds);
                 repaint();
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -67,17 +74,10 @@ public class Forno extends JPanel implements Runnable, MouseListener {
         Graphics2D g2d = (Graphics2D) g;
 
         disegnaSfondo(g2d);
+        disegnaBtnBancone(g2d);
 
-        // Disegna un rettangolo nero semi-trasparente per il fading
-        g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, blackOpacity));
-        g2d.setColor(Color.BLACK);
-        g2d.fillRect(0, 0, width, height);
+        FadingScene.disegnaFadingRect(g2d);
 
-        // Ripristina la trasparenza completa per il disegno normale
-        g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
-
-        g2d.setColor(Color.BLACK);
-        g2d.fillRect(btnBanconeBounds.x, btnBanconeBounds.y, btnBanconeBounds.width, btnBanconeBounds.height);
     }
 
     private void disegnaSfondo(Graphics2D g2d) {
@@ -89,51 +89,14 @@ public class Forno extends JPanel implements Runnable, MouseListener {
         }
     }
 
-    private BufferedImage loadImage(String path) {
-        try {
-            return ImageIO.read(new File(path));
-        } catch (IOException e) {
-            System.out.println(e.getMessage());
-            return null;
+    private void disegnaBtnBancone(Graphics2D g2d) {
+        if (btnBancone != null) {
+            g2d.drawImage(btnBancone, btnBancone.getWidth() + 270, btnBancone.getHeight() - 118, 125, 125,
+                    this);
+        } else {
+            g2d.setColor(Color.BLACK);
+            g2d.fillRect(width - 40, 100, width, height);
         }
-    }
-
-    private void setCustomCursors() {
-        BufferedImage defaultCursorImage = loadImage("img/default_cursor.png");
-        BufferedImage selectCursorImage = loadImage("img/select_cursor.png");
-        BufferedImage transparentSelectCursorImage = loadImage("img/trasparent_select_cursor.png");
-
-        if (defaultCursorImage != null) {
-            defaultCursor = Toolkit.getDefaultToolkit().createCustomCursor(defaultCursorImage, new Point(0, 0),
-                    "Default Cursor");
-        }
-        if (selectCursorImage != null) {
-            selectCursor = Toolkit.getDefaultToolkit().createCustomCursor(selectCursorImage, new Point(0, 0),
-                    "Select Cursor");
-        }
-
-        // Crea il cursore trasparente
-        if (transparentSelectCursorImage != null) {
-            transparentSelectCursor = Toolkit.getDefaultToolkit().createCustomCursor(transparentSelectCursorImage,
-                    new Point(0, 0),
-                    "Transparent Select Cursor");
-        }
-        setCursor(defaultCursor);
-    }
-
-    private void updateCursor() {
-        Point mousePosition = getMousePosition();
-        if (mousePosition != null) {
-            if (isMouseOverBtn(mousePosition, btnBanconeBounds)) {
-                setCursor(selectCursor);
-            } else {
-                setCursor(defaultCursor);
-            }
-        }
-    }
-
-    private boolean isMouseOverBtn(Point mousePoint, Rectangle btnBounds) {
-        return btnBounds.contains(mousePoint);
     }
 
     @Override
@@ -158,28 +121,12 @@ public class Forno extends JPanel implements Runnable, MouseListener {
     public void mouseReleased(MouseEvent e) {
         if (e.getButton() == MouseEvent.BUTTON1) {
             Point mousePosition = e.getPoint();
-            if (isMouseOverBtn(mousePosition, btnBanconeBounds)) {
+            if (DynamicCursor.isMouseOverBounds(mousePosition, btnBanconeBounds)) {
                 if (toPnlBanconeAction != null) {
                     toPnlBanconeAction.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, null));
                 }
             }
         }
-    }
-
-    public void fadingIn() {
-        fadeInTimer = new Timer(20, new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                blackOpacity -= 0.05f; // Riduce l'opacità del nero
-                if (blackOpacity <= 0f) {
-                    blackOpacity = 0f; // Limita l'opacità al minimo
-                    fadeInTimer.stop();
-                }
-                repaint();
-            }
-        });
-        blackOpacity = 1f;
-        fadeInTimer.start();
     }
 
 }

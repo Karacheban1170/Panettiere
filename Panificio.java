@@ -1,9 +1,6 @@
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import javax.imageio.ImageIO;
 import javax.swing.*;
 
 public class Panificio extends JPanel implements Runnable, FocusListener, MouseListener {
@@ -26,14 +23,11 @@ public class Panificio extends JPanel implements Runnable, FocusListener, MouseL
 
     private Cursor defaultCursor, selectCursor, transparentSelectCursor;
 
-    private float blackOpacity = 1f;
-    private Timer fadeInTimer;
-
     public Panificio(int width, int height, ActionListener toPnlBanconeAction) {
         this.width = width;
         this.height = height;
-        this.sfondo = loadImage("img/panificio_sfondo.jpg");
-        this.bancone = loadImage("img/panificio_bancone.png");
+        this.sfondo = ImageLoader.loadImage("img/panificio_sfondo.jpg");
+        this.bancone = ImageLoader.loadImage("img/panificio_bancone.png");
 
         panettiere = new Panettiere(this);
 
@@ -44,9 +38,9 @@ public class Panificio extends JPanel implements Runnable, FocusListener, MouseL
         addFocusListener(this);
         addMouseListener(this);
 
-        setCustomCursors();
+        DynamicCursor.setCustomCursors(this);
 
-        fadingIn();
+        FadingScene.fadingIn();
     }
 
     @Override
@@ -54,7 +48,7 @@ public class Panificio extends JPanel implements Runnable, FocusListener, MouseL
         while (running) {
             try {
                 Thread.sleep(10);
-                updateCursor();
+                DynamicCursor.updateCursor(this, Panettiere.getPanettiereBounds(), banconeBounds);
                 repaint();
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -83,17 +77,11 @@ public class Panificio extends JPanel implements Runnable, FocusListener, MouseL
         panettiere.disegnaPanettiere(g2d);
         disegnaBancone(g2d);
 
-        // Disegna un rettangolo nero semi-trasparente per il fading
-        g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, blackOpacity));
-        g2d.setColor(Color.BLACK);
-        g2d.fillRect(0, 0, width, height);
-
-        // Ripristina la trasparenza completa per il disegno normale
-        g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
-
         if (!focussed) {
             paintIstruzioni(g2d);
         }
+
+        FadingScene.disegnaFadingRect(g2d);
     }
 
     private void disegnaSfondo(Graphics2D g2d) {
@@ -114,15 +102,6 @@ public class Panificio extends JPanel implements Runnable, FocusListener, MouseL
         }
     }
 
-    private BufferedImage loadImage(String path) {
-        try {
-            return ImageIO.read(new File(path));
-        } catch (IOException e) {
-            System.out.println(e.getMessage());
-            return null;
-        }
-    }
-
     private void paintIstruzioni(Graphics2D g2d) {
         // Imposta il colore e la trasparenza per lo sfondo delle istruzioni
         g2d.setColor(new Color(0, 0, 0, 150)); // Nero semi-trasparente
@@ -135,11 +114,11 @@ public class Panificio extends JPanel implements Runnable, FocusListener, MouseL
         g2d.drawString("Clicca con il mouse per interagire!", width / 2 - 150, height / 2 + 80);
 
         // Carica e disegna le immagini dei tasti A, D e del mouse
-        BufferedImage tastoA = loadImage("img/tastoA.png");
-        BufferedImage tastoD = loadImage("img/tastoD.png");
-        BufferedImage frecciaSinistra = loadImage("img/freccia_sinistra.png");
-        BufferedImage frecciaDestra = loadImage("img/freccia_destra.png");
-        BufferedImage mouse = loadImage("img/mouse.png");
+        BufferedImage tastoA = ImageLoader.loadImage("img/tastoA.png");
+        BufferedImage tastoD = ImageLoader.loadImage("img/tastoD.png");
+        BufferedImage frecciaSinistra = ImageLoader.loadImage("img/freccia_sinistra.png");
+        BufferedImage frecciaDestra = ImageLoader.loadImage("img/freccia_destra.png");
+        BufferedImage mouse = ImageLoader.loadImage("img/mouse.png");
 
         int keySize = 60; // Dimensioni delle icone
 
@@ -184,53 +163,6 @@ public class Panificio extends JPanel implements Runnable, FocusListener, MouseL
         repaint();
     }
 
-    private void setCustomCursors() {
-        BufferedImage defaultCursorImage = loadImage("img/default_cursor.png");
-        BufferedImage selectCursorImage = loadImage("img/select_cursor.png");
-        BufferedImage transparentSelectCursorImage = loadImage("img/trasparent_select_cursor.png");
-
-        if (defaultCursorImage != null) {
-            defaultCursor = Toolkit.getDefaultToolkit().createCustomCursor(defaultCursorImage, new Point(0, 0),
-                    "Default Cursor");
-        }
-        if (selectCursorImage != null) {
-            selectCursor = Toolkit.getDefaultToolkit().createCustomCursor(selectCursorImage, new Point(0, 0),
-                    "Select Cursor");
-        }
-
-        // Crea il cursore trasparente
-        if (transparentSelectCursorImage != null) {
-            transparentSelectCursor = Toolkit.getDefaultToolkit().createCustomCursor(transparentSelectCursorImage,
-                    new Point(0, 0),
-                    "Transparent Select Cursor");
-        }
-        setCursor(defaultCursor);
-    }
-
-    private void updateCursor() {
-        Point mousePosition = getMousePosition();
-        if (mousePosition != null) {
-            if (isMouseOverBancone(mousePosition)) {
-                if (isPanettiereIntersectsBancone(banconeBounds)) {
-                    setCursor(selectCursor);
-                } else {
-                    setCursor(transparentSelectCursor);
-                }
-            } else {
-                setCursor(defaultCursor);
-            }
-        }
-    }
-
-    private boolean isMouseOverBancone(Point mousePoint) {
-        return banconeBounds.contains(mousePoint);
-    }
-
-    private boolean isPanettiereIntersectsBancone(Rectangle banconeBounds) {
-        Rectangle panettiereBounds = panettiere.getPanettiereBounds();
-        return panettiereBounds != null && panettiereBounds.intersects(banconeBounds);
-    }
-
     @Override
     public void mousePressed(MouseEvent e) {
 
@@ -254,28 +186,12 @@ public class Panificio extends JPanel implements Runnable, FocusListener, MouseL
     public void mouseReleased(MouseEvent e) {
         if (clickAllowed && e.getButton() == MouseEvent.BUTTON1) {
             Point mousePosition = e.getPoint();
-            if (isMouseOverBancone(mousePosition) && isPanettiereIntersectsBancone(banconeBounds)) {
+            if (DynamicCursor.isMouseOverBounds(mousePosition, banconeBounds) && DynamicCursor.isPanettiereIntersectsBounds(Panettiere.getPanettiereBounds(), banconeBounds)) {
                 if (toPnlBanconeAction != null) {
                     toPnlBanconeAction.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, null));
                 }
             }
         }
-    }
-
-    public void fadingIn() {
-        fadeInTimer = new Timer(20, new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                blackOpacity -= 0.05f; // Riduce l'opacità del nero
-                if (blackOpacity <= 0f) {
-                    blackOpacity = 0f; // Limita l'opacità al minimo
-                    fadeInTimer.stop();
-                }
-                repaint();
-            }
-        });
-        blackOpacity = 1f;
-        fadeInTimer.start();
     }
 
 }

@@ -1,7 +1,7 @@
 public class PanificioMonitor {
 	private final int capacity = 1;
 	private int clientiDentro;
-	private boolean clientiEntrano = false;
+	private static boolean clientiEntrano = false;
 
 	public boolean panificioLibero() {
 		return clientiDentro == 0;
@@ -18,6 +18,7 @@ public class PanificioMonitor {
 		}
 		clientiEntrano = true;
 		clientiDentro++;
+
 		System.out.println("Cliente " + nome + " e' entrato al panificio");
 	}
 	
@@ -34,7 +35,7 @@ public class PanificioMonitor {
 
 	}
 
-	public boolean isClientiEntrano() {
+	public static boolean isClientiEntrano() {
         return clientiEntrano;
     }
 

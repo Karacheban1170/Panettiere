@@ -17,7 +17,7 @@ public class Panettiere implements KeyListener {
 
     private boolean movimentoSinistra = false;
 
-    private Rectangle panettiereBounds;
+    private static Rectangle panettiereBounds;
 
     public Panettiere(Panificio pnlPanificio) {
         this.imgPanettiere = loadImage("img/panettiere.png");
@@ -116,7 +116,7 @@ public class Panettiere implements KeyListener {
     /**
      * @return the panettiereBounds
      */
-    public Rectangle getPanettiereBounds() {
+    public static Rectangle getPanettiereBounds() {
         return panettiereBounds;
     }
 

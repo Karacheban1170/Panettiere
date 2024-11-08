@@ -22,29 +22,30 @@ public class PanificioFrame extends JFrame {
 
         initPanelli();
 
+        // pnlForno.fadingIn();
         showPanel("PnlPanificio");
     }
 
     private void initPanelli() {
-        pnlBancone = new Bancone(WIDTH_FRAME, HEIGHT_FRAME, e -> {
-            showPanel("PnlPanificio");
-            pnlPanificio.fadingIn();
-        }, e -> {
-            showPanel("PnlForno");
-            pnlForno.fadingIn();
-        });
         pnlPanificio = new Panificio(WIDTH_FRAME, HEIGHT_FRAME, e -> {
             showPanel("PnlBancone");
             pnlBancone.initClienti();
-            pnlBancone.fadingIn();
+            FadingScene.fadingIn();
+        });
+        pnlBancone = new Bancone(WIDTH_FRAME, HEIGHT_FRAME, e -> {
+            showPanel("PnlPanificio");
+            FadingScene.fadingIn();
+        }, e -> {
+            showPanel("PnlForno");
+            FadingScene.fadingIn();
         });
         pnlForno = new Forno(WIDTH_FRAME, HEIGHT_FRAME, e -> {
             showPanel("PnlBancone");
-            pnlBancone.fadingIn();
+            FadingScene.fadingIn();
         });
 
-        pnlBancone.start();
         pnlPanificio.start();
+        pnlBancone.start();
         pnlForno.start();
 
         getContentPane().add(pnlPanificio, "PnlPanificio");
@@ -57,5 +58,13 @@ public class PanificioFrame extends JFrame {
         if ("PnlPanificio".equals(panelName)) {
             pnlPanificio.requestFocusInWindow();
         }
+    }
+
+    public static int getWidthFrame() {
+        return WIDTH_FRAME;
+    }
+
+    public static int getHeightFrame() {
+        return HEIGHT_FRAME;
     }
 }
