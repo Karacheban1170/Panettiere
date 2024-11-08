@@ -1,11 +1,8 @@
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
-import javax.imageio.ImageIO;
 
 public class Cliente implements Runnable {
     private int clienteX;
@@ -17,63 +14,73 @@ public class Cliente implements Runnable {
     private final int height;
     private final String nome;
 
-    private final int secondi;
-
-    private static final int VELOCITA_CLIENTE = 10;
+    private static final int VELOCITA_CLIENTE = 3;
     private final BufferedImage imgCliente;
-    private BufferedImage nuvola;
+    private final BufferedImage nuvola;
 
+    private final ArrayList<Prodotto> prodotti;
     private final Prodotto prodottoDesiderato;
-    private final ArrayList<Prodotto> prodottiDisponibili;
+
+    private boolean soddisfatto;
+    private boolean prodottoComprato;
 
     private final PanificioMonitor panificioMonitor;
 
     private Thread clienteThread;
     private boolean running = true;
 
-    private boolean movimentoSinistra = false;
-    private static boolean clienteAspetta = false;
+    private boolean movimentoSinistra;
+    private boolean clienteAspetta;
+    private static boolean clienteEntrato;
 
-    private final MyProgressBar myProgressBar;
+    private final int secondi;
+    private final int maxValue;
+    private final int minValue;
+
+    private int currentValue;
 
     public Cliente(BufferedImage imgCliente, PanificioMonitor panificioMonitor, String nome,
-            ArrayList<Prodotto> prodottiDisponibili) {
+            ArrayList<Prodotto> prodotti) {
         this.panificioMonitor = panificioMonitor;
         this.imgCliente = imgCliente;
-        this.secondi = 10;
-        this.width = 200;
-        this.height = width + 150;
-        this.clienteX = -width - 50;
-        this.clienteY = 120;
         this.nome = nome;
+        this.prodotti = prodotti;
+        prodottoDesiderato = scegliProdottoDesiderato();
 
-        this.centroBancone = PanificioFrame.getWidthFrame() / 2 - width / 2;
+        // Variabili del Cliente
+        width = 200;
+        height = width + 150;
+        clienteX = -width - 50;
+        clienteY = 120;
+        soddisfatto = false;
+        prodottoComprato = false;
 
-        try {
-            this.nuvola = ImageIO.read(new File("img/nuvola.png"));
-        } catch (IOException e) {
-            e.getMessage();
-        }
+        movimentoSinistra = false;
+        clienteAspetta = false;
+        clienteEntrato = false;
 
-        this.prodottiDisponibili = prodottiDisponibili;
-        this.prodottoDesiderato = scegliProdottoDesiderato();
+        // Variabili della ProgressBar
+        secondi = 10;
+        maxValue = 100;
+        minValue = 0;
+        currentValue = maxValue;
 
-        // Inizializza la barra di progresso e aggiungila al pannello
-        myProgressBar = new MyProgressBar(0, 100);
-        myProgressBar.setPreferredSize(new Dimension(width / 2, 20));
-        myProgressBar.setProgressColor(new Color(0, 255, 0, 127));
+        centroBancone = PanificioFrame.getWidthFrame() / 2 - width / 2;
+        nuvola = ImageLoader.loadImage("img/nuvola.png");
     }
 
     @Override
     public void run() {
         while (running) {
             entraCliente();
+            System.out.println(nome + " desidera acquistare: un/a " + prodottoDesiderato.getNome());
             Thread progressBarThread = createAndStartDecrementThread(secondi);
 
             // Una volta entrato, il cliente si ferma e aspetta un momento
             try {
                 progressBarThread.join();
                 clienteAspetta = false;
+                clienteEntrato = false;
             } catch (InterruptedException e) {
                 e.getMessage();
             }
@@ -113,7 +120,7 @@ public class Cliente implements Runnable {
 
     private Prodotto scegliProdottoDesiderato() {
         Random rand = new Random();
-        return prodottiDisponibili.get(rand.nextInt(prodottiDisponibili.size())); // Scegli un prodotto casuale
+        return prodotti.get(rand.nextInt(prodotti.size())); // Scegli un prodotto casuale
     }
 
     public void disegnaNuvola(Graphics2D g2d) {
@@ -142,21 +149,26 @@ public class Cliente implements Runnable {
         int x = clienteX;
         int y = 80;
 
-        if (myProgressBar.getValue() != 0) {
-            g2d.setColor(Color.BLACK);
-            g2d.drawRect(x, y, progressBarWidth, progressBarHeight);
+        if (currentValue > 0) {
+            if (!prodottoComprato) {
+
+                g2d.setColor(Color.BLACK);
+                g2d.drawRect(x, y, progressBarWidth, progressBarHeight);
+
+                int filledWidth = (int) ((currentValue / 100.0) * progressBarWidth);
+
+                g2d.setColor(Color.GREEN);
+                g2d.fillRect(x, y, filledWidth, progressBarHeight);
+            }
         }
 
-        int filledWidth = (int) ((myProgressBar.getValue() / 100.0) * progressBarWidth);
-
-        g2d.setColor(myProgressBar.getProgressColor());
-        g2d.fillRect(x, y, filledWidth, progressBarHeight);
     }
 
     private Thread createAndStartDecrementThread(int secondi) {
 
         // Crea un thread per la barra di progresso da 100 a 0.
         Thread progressBarThread = new Thread(new Runnable() {
+
             @Override
             public void run() {
                 // Calcola il ritardo tra ogni decremento della barra di progresso per
@@ -166,11 +178,22 @@ public class Cliente implements Runnable {
                 // Dividendo per 100 otteniamo l'intervallo di tempo per ridurre di un'unità
                 int count = 100;
                 int delay = (secondi * 1000) / count;
+
                 while (count > 0) {
+                    if (prodottoComprato)
+                        break;
                     try {
                         Thread.sleep(delay);
                         count--;
-                        myProgressBar.setValue(count);
+
+                        if (count > maxValue) {
+                            return;
+                        }
+                        if (count < minValue) {
+                            return;
+                        }
+
+                        currentValue = count;
                     } catch (InterruptedException e) {
                         e.getMessage();
                     }
@@ -179,6 +202,7 @@ public class Cliente implements Runnable {
         });
 
         clienteAspetta = true;
+        clienteEntrato = true;
         progressBarThread.start();
 
         // Restituiamo il thread per poter fare join() nel metodo run()
@@ -192,7 +216,7 @@ public class Cliente implements Runnable {
         while (clienteX < centroBancone) {
             clienteX += VELOCITA_CLIENTE; // Muovi il cliente a destra
             try {
-                Thread.sleep(50); // Controllo del movimento
+                Thread.sleep(10); // Controllo del movimento
             } catch (InterruptedException e) {
                 e.getMessage();
             }
@@ -206,7 +230,7 @@ public class Cliente implements Runnable {
         while (clienteX > -width) {
             clienteX -= VELOCITA_CLIENTE; // Muovi il cliente a sinistra
             try {
-                Thread.sleep(50); // Controllo del movimento
+                Thread.sleep(10); // Controllo del movimento
             } catch (InterruptedException e) {
                 e.getMessage();
             }
@@ -215,8 +239,12 @@ public class Cliente implements Runnable {
         stop();
     }
 
-    public static boolean isClienteAspetta() {
+    public boolean isClienteAspetta() {
         return clienteAspetta;
+    }
+
+    public static boolean isClienteEntrato() {
+        return clienteEntrato;
     }
 
     public int getClienteX() {
@@ -233,6 +261,27 @@ public class Cliente implements Runnable {
 
     public int getHeight() {
         return height;
+    }
+
+    public String getNome() {
+        return nome;
+    }
+
+    public Prodotto getProdottoDesiderato() {
+        return prodottoDesiderato;
+    }
+
+    public void setSoddisfatto(boolean stato) {
+        this.soddisfatto = stato;
+        if (stato) {
+            System.out.println(nome + " e' stato soddisfatto: ");
+        } else {
+            System.out.println(nome + " non e' stato soddisfatto: ");
+        }
+    }
+
+    public void setProdottoComprato(boolean stato) {
+        this.prodottoComprato = stato;
     }
 
 }

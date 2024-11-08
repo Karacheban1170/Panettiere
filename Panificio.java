@@ -21,8 +21,6 @@ public class Panificio extends JPanel implements Runnable, FocusListener, MouseL
 
     private ActionListener toPnlBanconeAction;
 
-    private Cursor defaultCursor, selectCursor, transparentSelectCursor;
-
     public Panificio(int width, int height, ActionListener toPnlBanconeAction) {
         this.width = width;
         this.height = height;

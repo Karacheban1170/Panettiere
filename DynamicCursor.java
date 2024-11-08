@@ -11,10 +11,6 @@ public class DynamicCursor {
 
     private static Cursor defaultCursor, selectCursor, transparentSelectCursor;
 
-    public DynamicCursor() {
-
-    }
-
     public static void setCustomCursors(JPanel panello) {
         BufferedImage defaultCursorImage = ImageLoader.loadImage("img/default_cursor.png");
         BufferedImage selectCursorImage = ImageLoader.loadImage("img/select_cursor.png");
@@ -54,7 +50,8 @@ public class DynamicCursor {
     }
 
     // Metodo UpdateCursor per "Bancone"
-    public static void updateCursor(JPanel panello, Rectangle btnIndietroBounds, Rectangle btnFornoBounds, ArrayList<Rectangle> prodottiBounds) {
+    public static void updateCursor(JPanel panello, Rectangle btnIndietroBounds, Rectangle btnFornoBounds,
+            ArrayList<Rectangle> prodottiBounds) {
         Point mousePosition = panello.getMousePosition();
         if (mousePosition != null) {
             String area = "";
@@ -71,29 +68,27 @@ public class DynamicCursor {
             // Imposta il cursore in base all'area determinata
             switch (area) {
                 case "btnIndietro":
-                    if (PanificioMonitor.isClientiEntrano()){
-                    panello.setCursor(transparentSelectCursor);
-                    }
-                    else{
-                    panello.setCursor(selectCursor);
+                    if (PanificioMonitor.isClientiEntrano()) {
+                        panello.setCursor(transparentSelectCursor);
+                    } else {
+                        panello.setCursor(selectCursor);
                     }
                     break;
 
                 case "prodotti":
-                    if (Cliente.isClienteAspetta()){
-                    panello.setCursor(selectCursor); 
-                }
-                    else{
-                    panello.setCursor(transparentSelectCursor); 
-                }
+                    if (Cliente.isClienteEntrato()) {
+                        panello.setCursor(selectCursor);
+                    } else {
+                        panello.setCursor(transparentSelectCursor);
+                    }
                     break;
 
                 case "btnForno":
-                panello.setCursor(selectCursor);
+                    panello.setCursor(selectCursor);
                     break;
 
                 default:
-                panello.setCursor(defaultCursor);
+                    panello.setCursor(defaultCursor);
                     break;
             }
         }
@@ -110,17 +105,6 @@ public class DynamicCursor {
             }
         }
     }
-
-    // public void updateCursor() {
-    // Point mousePosition = getMousePosition();
-    // if (mousePosition != null) {
-    // if (isMouseOverBtn(mousePosition, btnBanconeBounds)) {
-    // setCursor(selectCursor);
-    // } else {
-    // setCursor(defaultCursor);
-    // }
-    // }
-    // }
 
     public static boolean isPanettiereIntersectsBounds(Rectangle panettiereBounds, Rectangle bounds) {
         panettiereBounds = Panettiere.getPanettiereBounds();

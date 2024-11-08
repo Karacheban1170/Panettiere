@@ -33,7 +33,7 @@ public class Prodotto {
     }
 
     public void decrementaQuantita() {
-        if (quantita > 0 && Cliente.isClienteAspetta()) {
+        if (quantita > 0) {
             quantita--;
         }
     }

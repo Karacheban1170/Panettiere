@@ -22,18 +22,20 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
     private final Rectangle btnFornoBounds;
 
     private ArrayList<Cliente> clienti;
+    private int numClienti;
 
     private final ArrayList<Prodotto> prodotti;
     private final ArrayList<Rectangle> prodottiBounds;
-    private final int quantita;
+    private final int numProdotti;
+    private final int quantitaProdotti;
 
     private final BufferedImage[] immaginiClienti = {
-        ImageLoader.loadImage("img/cliente1.png"),
-        ImageLoader.loadImage("img/cliente2.png"),
-        ImageLoader.loadImage("img/cliente3.png"),
-        ImageLoader.loadImage("img/cliente4.png"),
-        ImageLoader.loadImage("img/cliente5.png"),
-        ImageLoader.loadImage("img/cliente6.png")
+            ImageLoader.loadImage("img/cliente1.png"),
+            ImageLoader.loadImage("img/cliente2.png"),
+            ImageLoader.loadImage("img/cliente3.png"),
+            ImageLoader.loadImage("img/cliente4.png"),
+            ImageLoader.loadImage("img/cliente5.png"),
+            ImageLoader.loadImage("img/cliente6.png")
     };
 
     private final ActionListener toPnlPanificioAction;
@@ -49,14 +51,15 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
 
         panificioMonitor = new PanificioMonitor();
 
-        prodotti = new ArrayList<>(4);
+        numClienti = 6;
+        numProdotti = 4;
+        quantitaProdotti = 5;
+        prodotti = new ArrayList<>(numProdotti);
         prodottiBounds = new ArrayList<>(prodotti.size());
-
-        quantita = 5;
-        prodotti.add(new Prodotto(ImageLoader.loadImage("img/prodotto1.png"), "ciambella", quantita));
-        prodotti.add(new Prodotto(ImageLoader.loadImage("img/prodotto2.png"),"croissant", quantita));
-        prodotti.add(new Prodotto(ImageLoader.loadImage("img/prodotto3.png"),"muffin", quantita));
-        prodotti.add(new Prodotto(ImageLoader.loadImage("img/prodotto4.png"),"pane", quantita));
+        prodotti.add(new Prodotto(ImageLoader.loadImage("img/prodotto1.png"), "ciambella", quantitaProdotti));
+        prodotti.add(new Prodotto(ImageLoader.loadImage("img/prodotto2.png"), "croissant", quantitaProdotti));
+        prodotti.add(new Prodotto(ImageLoader.loadImage("img/prodotto3.png"), "muffin", quantitaProdotti));
+        prodotti.add(new Prodotto(ImageLoader.loadImage("img/prodotto4.png"), "pane", quantitaProdotti));
 
         btnIndietroBounds = new Rectangle(width - 215, 22, 180, 60);
         btnFornoBounds = new Rectangle(width - 181, 392, 105, 105);
@@ -183,12 +186,13 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
 
     public void initClienti() {
         clienti = new ArrayList<>();
-        Random rand = new Random();
+        Random imgRandom = new Random();
         ArrayList<Thread> threads = new ArrayList<>();
 
-        for (int i = 0; i < 6; i++) {
-            Cliente cliente = new Cliente(immaginiClienti[rand.nextInt(immaginiClienti.length)],
-                    panificioMonitor, "Cliente" + (i + 1), prodotti);
+        for (int i = 0; i < numClienti; i++) {
+
+            Cliente cliente = new Cliente(immaginiClienti[imgRandom.nextInt(immaginiClienti.length)],
+                    panificioMonitor, "Cliente " + (i + 1), prodotti);
             clienti.add(cliente);
 
             Thread th = new Thread(cliente);
@@ -203,17 +207,33 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
     @Override
     public void mouseClicked(MouseEvent e) {
         requestFocusInWindow();
-
         Point mousePosition = e.getPoint();
 
         // Controlla se il clic è su uno dei prodotti
         for (int i = 0; i < prodottiBounds.size(); i++) {
             if (prodottiBounds.get(i).contains(mousePosition)) {
-                prodotti.get(i).decrementaQuantita();
+                Prodotto prodottoSelezionato = prodotti.get(i);
+
+                // Verifica se il cliente desidera questo prodotto
+                for (Cliente cliente : clienti) {
+                    if (cliente.isClienteAspetta()) {
+                        cliente.setProdottoComprato(true);
+                        if (cliente.getProdottoDesiderato().equals(prodottoSelezionato)) {
+                            // Decrementa la quantità del prodotto
+                            prodottoSelezionato.decrementaQuantita();
+                            cliente.setSoddisfatto(true);
+                            break;
+                        }
+                        else{
+                            prodottoSelezionato.decrementaQuantita();
+                            cliente.setSoddisfatto(false);
+                            break;
+                        }
+                    }
+                }
                 break;
             }
         }
-
     }
 
     @Override

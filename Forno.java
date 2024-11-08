@@ -21,7 +21,6 @@ public class Forno extends JPanel implements Runnable, MouseListener {
     private final ArrayList<Prodotto> ingredienti;
     private final ArrayList<Rectangle> ingredientiBounds;
 
-
     public Forno(int width, int height, ActionListener toPnlBanconeAction) {
         this.width = width;
         this.height = height;

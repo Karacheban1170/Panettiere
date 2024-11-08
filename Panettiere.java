@@ -29,7 +29,7 @@ public class Panettiere implements KeyListener {
         this.centroX = 370;
         this.centroY = 140;
 
-        this.panettiereBounds = new Rectangle(centroX + 100, centroY, width - 199, height);
+        Panettiere.panettiereBounds = new Rectangle(centroX + 100, centroY, width - 199, height);
     }
 
     private BufferedImage loadImage(String path) {
@@ -43,7 +43,7 @@ public class Panettiere implements KeyListener {
 
     public void disegnaPanettiere(Graphics2D g2d) {
         if (imgPanettiere != null) {
-            this.panettiereBounds = new Rectangle(centroX + 100, centroY, 1, height);
+            Panettiere.panettiereBounds = new Rectangle(centroX + 100, centroY, 1, height);
             if (movimentoSinistra) {
                 AffineTransform originalTransform = g2d.getTransform(); // Salva lo stato originale
                 g2d.translate(centroX + width, centroY); // Posizionare il panettiere
@@ -54,7 +54,7 @@ public class Panettiere implements KeyListener {
                 g2d.drawImage(imgPanettiere, centroX, centroY, width, height, null);
             }
         } else {
-            this.panettiereBounds = new Rectangle(centroX + 100, centroY, 1, height);
+            Panettiere.panettiereBounds = new Rectangle(centroX + 100, centroY, 1, height);
             g2d.setColor(Color.BLACK);
             g2d.fillRect(centroX, centroY, width, height);
         }
@@ -74,7 +74,6 @@ public class Panettiere implements KeyListener {
                 movimentoSinistra = false; // Cambia la direzione
             }
         }
-        pnlPanificio.repaint();
     }
 
     @Override
