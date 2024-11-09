@@ -24,7 +24,7 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
     private ArrayList<Cliente> clienti;
     private final int numClienti;
 
-    private final ArrayList<Prodotto> prodotti;
+    private static ArrayList<Prodotto> prodotti;
     private final ArrayList<Rectangle> prodottiBounds;
     private final int numProdotti;
     private final int quantitaProdotti;
@@ -264,5 +264,12 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
 
     @Override
     public void mouseExited(MouseEvent e) {
+    }
+
+    /**
+     * @return the prodotti
+     */
+    public static ArrayList<Prodotto> getProdotti() {
+        return prodotti;
     }
 }

@@ -2,6 +2,9 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import javax.swing.*;
 
 public class Forno extends JPanel implements Runnable, MouseListener {
@@ -19,7 +22,10 @@ public class Forno extends JPanel implements Runnable, MouseListener {
     private final ActionListener toPnlBanconeAction;
 
     private final ArrayList<Prodotto> ingredienti;
+    private final ArrayList<BufferedImage> ingredientiFrame;
     private final ArrayList<Rectangle> ingredientiBounds;
+    private Prodotto nuovoProdotto;
+    private final Map<Set<String>, Prodotto> ricette;
 
     public Forno(int width, int height, ActionListener toPnlBanconeAction) {
         this.width = width;
@@ -31,7 +37,11 @@ public class Forno extends JPanel implements Runnable, MouseListener {
 
         ingredienti = new ArrayList<>(4);
         ingredientiBounds = new ArrayList<>(ingredienti.size());
+        ingredientiFrame = new ArrayList<>(ingredienti.size());
+        nuovoProdotto = null;
+        ricette = new HashMap<>();
         aggiungiIngredienti();
+        caricaRicette();
 
         btnBanconeBounds = new Rectangle(width - 181, 392, 105, 105);
         this.toPnlBanconeAction = toPnlBanconeAction;
@@ -65,29 +75,6 @@ public class Forno extends JPanel implements Runnable, MouseListener {
         running = false;
     }
 
-    private void aggiungiIngredienti() {
-        int startX = width / 2 - 180; // Coordinata iniziale x centrata dinamicamente
-        int yPos = 415; // Posizione fissa verticale
-
-        // Aggiungi ingredienti con posizioni calcolate dinamicamente
-        ingredienti.add(new Prodotto(ImageLoader.loadImage("img/ingrediente1.png"), "acqua"));
-        ingredienti.add(new Prodotto(ImageLoader.loadImage("img/ingrediente2.png"), "farina"));
-        ingredienti.add(new Prodotto(ImageLoader.loadImage("img/ingrediente3.png"), "latte"));
-        ingredienti.add(new Prodotto(ImageLoader.loadImage("img/ingrediente4.png"), "uova"));
-
-        int offsetX = 100; // Distanza orizzontale tra ingredienti
-        int currentX = startX;
-
-        for (Prodotto ingrediente : ingredienti) {
-            ingrediente.setBounds(currentX, yPos, 60, 60);
-            ingrediente.setFixedPositionBancone(new Point(currentX, yPos));
-
-            ingredientiBounds.add(ingrediente.getBounds());
-            add(ingrediente);
-            currentX += offsetX;
-        }
-    }
-
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -96,12 +83,14 @@ public class Forno extends JPanel implements Runnable, MouseListener {
         disegnaSfondo(g2d);
 
         disegnaCornici(g2d);
-        disegnaIngredienti(g2d);
+        cuociProdotto();
 
         disegnaBtnBancone(g2d);
 
-        FadingScene.disegnaFadingRect(g2d);
+        disegnaIngredientiFrame(g2d);
+        disegnaIngredienti(g2d);
 
+        FadingScene.disegnaFadingRect(g2d);
     }
 
     private void disegnaSfondo(Graphics2D g2d) {
@@ -116,26 +105,72 @@ public class Forno extends JPanel implements Runnable, MouseListener {
     private void disegnaCornici(Graphics2D g2d) {
 
         Graphics2D g2dTrans = (Graphics2D) g2d.create();
-        g2dTrans.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.3f));
+        g2dTrans.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));
         // Assumiamo che ingredienti contenga gli oggetti Prodotto
-        for (Prodotto ingrediente : ingredienti) {
-            // Cornice 1 - Forno 1
-            Rectangle forno1Frame = new Rectangle(ingrediente.getFixedPositionForno1().x,
-                    ingrediente.getFixedPositionForno1().y, 60, 60);
-            g2dTrans.setColor(Color.BLACK); // Colore nero per la prima cornice
-            g2dTrans.fill(forno1Frame);
+        // Cornice 1 - Forno 1
+        Rectangle forno1Frame = new Rectangle(Prodotto.getFixedPositionForno1().x,
+                Prodotto.getFixedPositionForno1().y, 60, 60);
+        g2dTrans.setColor(Color.BLACK); // Colore nero per la prima cornice
+        g2dTrans.fill(forno1Frame);
 
-            // Cornice 2 - Forno 2
-            Rectangle forno2Frame = new Rectangle(ingrediente.getFixedPositionForno2().x,
-                    ingrediente.getFixedPositionForno2().y, 60, 60);
-            g2dTrans.setColor(Color.BLACK); // Colore nero per la seconda cornice
-            g2dTrans.fill(forno2Frame);
-        }
+        // Cornice 2 - Forno 2
+        Rectangle forno2Frame = new Rectangle(Prodotto.getFixedPositionForno2().x,
+                Prodotto.getFixedPositionForno2().y, 60, 60);
+        g2dTrans.setColor(Color.BLACK); // Colore nero per la seconda cornice
+        g2dTrans.fill(forno2Frame);
 
         // Cornice Centrale (Rosso)
-        Rectangle centraleFrame = new Rectangle(width / 2 - 30, height / 2 + 30, 60, 60); // Posizione centrale
+        Rectangle centraleFrame = new Rectangle(Prodotto.getPositionCentraleNuovoProdotto().x,
+                Prodotto.getPositionCentraleNuovoProdotto().y, 60, 60); // Posizione centrale
         g2dTrans.setColor(Color.RED); // Colore rosso per la cornice centrale
         g2dTrans.fill(centraleFrame);
+    }
+
+    private void aggiungiIngredienti() {
+        int startX = width / 4; // Coordinata iniziale x centrata dinamicamente
+        int yPos = 400; // Posizione fissa verticale
+
+        ingredientiFrame.add(ImageLoader.loadImage("img/ingredienteFrame1.png"));
+        ingredientiFrame.add(ImageLoader.loadImage("img/ingredienteFrame2.png"));
+        ingredientiFrame.add(ImageLoader.loadImage("img/ingredienteFrame3.png"));
+        ingredientiFrame.add(ImageLoader.loadImage("img/ingredienteFrame4.png"));
+        ingredientiFrame.add(ImageLoader.loadImage("img/ingredienteFrame5.png"));
+
+        // Aggiungi ingredienti con posizioni calcolate dinamicamente
+        ingredienti.add(new Prodotto(ImageLoader.loadImage("img/ingrediente1.png"), "acqua"));
+        ingredienti.add(new Prodotto(ImageLoader.loadImage("img/ingrediente2.png"), "farina"));
+        ingredienti.add(new Prodotto(ImageLoader.loadImage("img/ingrediente3.png"), "latte"));
+        ingredienti.add(new Prodotto(ImageLoader.loadImage("img/ingrediente4.png"), "uova"));
+        ingredienti.add(new Prodotto(ImageLoader.loadImage("img/ingrediente5.png"), "cioccolato"));
+
+        int offsetX = 100; // Distanza orizzontale tra ingredienti
+        int currentX = startX;
+
+        for (int i = 0; i < ingredienti.size(); i++) {
+            Prodotto ingrediente = ingredienti.get(i);
+
+            ingrediente.setBounds(currentX, yPos, 80, 80);
+            ingrediente.setFixedPositionBancone(new Point(currentX, yPos));
+
+            ingredientiBounds.add(ingrediente.getBounds());
+            add(ingrediente);
+
+            currentX += offsetX;
+        }
+    }
+
+    private void disegnaIngredientiFrame(Graphics2D g2d) {
+        int xPos = width / 4;
+        int yPos = 400;
+
+        for (int i = 0; i < ingredientiFrame.size(); i++) {
+            if (ingredientiFrame.get(i) != null) {
+                // Disegna il prodotto
+                g2d.drawImage(ingredientiFrame.get(i), xPos, yPos, 80, 80, this);
+
+                xPos += 100;
+            }
+        }
     }
 
     private void disegnaIngredienti(Graphics2D g2d) {
@@ -144,18 +179,73 @@ public class Forno extends JPanel implements Runnable, MouseListener {
             if (ingrediente.getImage() != null) {
                 Point location = ingrediente.getLocation();
 
-                g2d.drawImage(ingrediente.getImage(), location.x, location.y, ingrediente.getWidth(),
+                g2d.drawImage(ingrediente.getImage(), location.x, location.y,
+                        ingrediente.getWidth(),
                         ingrediente.getHeight(), this);
 
                 if (i < ingredientiBounds.size()) {
-                    ingredientiBounds.get(i).setBounds(location.x, location.y, ingrediente.getWidth(),
+                    ingredientiBounds.get(i).setBounds(location.x, location.y,
+                            ingrediente.getWidth(),
                             ingrediente.getHeight());
                 } else {
                     ingredientiBounds.add(
-                            new Rectangle(location.x, location.y, ingrediente.getWidth(), ingrediente.getHeight()));
+                            new Rectangle(location.x, location.y, ingrediente.getWidth(),
+                                    ingrediente.getHeight()));
                 }
             }
         }
+
+        // Disegna il prodotto visualizzato, se esiste
+        if (nuovoProdotto != null && nuovoProdotto.getImage() != null) {
+            Point location = nuovoProdotto.getLocation();
+
+            g2d.drawImage(nuovoProdotto.getImage(), location.x, location.y, nuovoProdotto.getWidth(),
+                    nuovoProdotto.getHeight(), this);
+        }
+
+    }
+
+    private void caricaRicette() {
+        // Crea le ricette usando coppie di ingredienti
+        ricette.put(Set.of("farina", "latte"), new Prodotto(ImageLoader.loadImage("img/prodotto1.png"), "ciambella"));
+        ricette.put(Set.of("farina", "uova"), new Prodotto(ImageLoader.loadImage("img/prodotto2.png"), "croissant"));
+        ricette.put(Set.of("farina", "cioccolato"), new Prodotto(ImageLoader.loadImage("img/prodotto3.png"), "muffin"));
+        ricette.put(Set.of("farina", "acqua"), new Prodotto(ImageLoader.loadImage("img/prodotto4.png"), "pane"));
+    }
+
+    private String getProdottoInForno(Point position) {
+        for (Prodotto ingrediente : ingredienti) {
+            if (ingrediente.getLocation().equals(position)) {
+                return ingrediente.getNome();
+            }
+        }
+        return null;
+    }
+
+    private void cuociProdotto() {
+        // Recupera ingredienti nelle posizioni del forno
+        String ingr1 = getProdottoInForno(Prodotto.getFixedPositionForno1());
+        String ingr2 = getProdottoInForno(Prodotto.getFixedPositionForno2());
+
+        if (ingr1 != null && ingr2 != null) {
+            Prodotto prodotto = ricette.get(Set.of(ingr1, ingr2));
+            if (prodotto != null) {
+                creaNuovoProdotto(ingr1, ingr2, prodotto.getImage(), prodotto.getNome());
+            }
+        }
+    }
+
+    private void creaNuovoProdotto(String ingr1, String ingr2, BufferedImage immagine, String nome) {
+        // Rimuove gli ingredienti
+        ingredienti.removeIf(ing -> ing.getNome().equals(ingr1) || ing.getNome().equals(ingr2));
+
+        // Crea il nuovo prodotto ma non lo aggiunge alla lista
+        nuovoProdotto = new Prodotto(immagine, nome);
+
+        // Imposta la posizione del nuovo prodotto
+        nuovoProdotto.setBounds(Prodotto.getPositionCentraleNuovoProdotto().x,
+                Prodotto.getPositionCentraleNuovoProdotto().y, 60,
+                60);
 
     }
 

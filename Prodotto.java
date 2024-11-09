@@ -14,8 +14,9 @@ public class Prodotto extends JComponent implements MouseListener, MouseMotionLi
 
     // Punti fissi per il posizionamento magnetico
     private Point fixedPositionBancone;
-    private Point fixedPositionForno1;
-    private Point fixedPositionForno2;
+    private static Point fixedPositionForno1;
+    private static Point fixedPositionForno2;
+    private static Point positionCentraleNuovoProdotto;
 
     public Prodotto(BufferedImage immagine, String nome, int quantita) {
         this.immagine = immagine;
@@ -30,6 +31,9 @@ public class Prodotto extends JComponent implements MouseListener, MouseMotionLi
         fixedPositionForno1 = new Point(PanificioFrame.getWidthFrame() / 2 - 100,
                 PanificioFrame.getHeightFrame() / 2 + 30);
         fixedPositionForno2 = new Point(PanificioFrame.getWidthFrame() / 2 + 40,
+                PanificioFrame.getHeightFrame() / 2 + 30);
+
+        positionCentraleNuovoProdotto = new Point(PanificioFrame.getWidthFrame() / 2 - 30,
                 PanificioFrame.getHeightFrame() / 2 + 30);
 
         addMouseListener(this);
@@ -83,12 +87,15 @@ public class Prodotto extends JComponent implements MouseListener, MouseMotionLi
         this.fixedPositionBancone = fixedPositionBancone;
     }
 
-    public Point getFixedPositionForno1() {
+    public static Point getFixedPositionForno1() {
         return fixedPositionForno1;
     }
 
-    public Point getFixedPositionForno2() {
+    public static Point getFixedPositionForno2() {
         return fixedPositionForno2;
+    }
+    public static Point getPositionCentraleNuovoProdotto() {
+        return positionCentraleNuovoProdotto;
     }
 
     public BufferedImage getImage() {
