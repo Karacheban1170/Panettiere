@@ -25,6 +25,7 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
     private final int numClienti;
 
     private static ArrayList<Prodotto> prodotti;
+    private final BufferedImage prodottoFrame;
     private final ArrayList<Rectangle> prodottiBounds;
     private final int numProdotti;
     private final int quantitaProdotti;
@@ -54,8 +55,11 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
         numClienti = 6;
         numProdotti = 4;
         quantitaProdotti = 5;
+
         prodotti = new ArrayList<>(numProdotti);
         prodottiBounds = new ArrayList<>(prodotti.size());
+
+        prodottoFrame = ImageLoader.loadImage("img/prodottoFrame.png");
         prodotti.add(new Prodotto(ImageLoader.loadImage("img/prodotto1.png"), "ciambella", quantitaProdotti));
         prodotti.add(new Prodotto(ImageLoader.loadImage("img/prodotto2.png"), "croissant", quantitaProdotti));
         prodotti.add(new Prodotto(ImageLoader.loadImage("img/prodotto3.png"), "muffin", quantitaProdotti));
@@ -141,22 +145,25 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
     }
 
     private void disegnaProdotti(Graphics2D g2d) {
-        int xPos = width / 2 - 180;
-        int yPos = 415;
+        int xPos = width / 2 - 195;
+        int yPos = 405;
 
         for (int i = 0; i < prodotti.size(); i++) {
             if (prodotti.get(i) != null) {
+                //Disegna la cornice del prodotto
+                g2d.drawImage(prodottoFrame, xPos, yPos, 80, 80, this);
+
                 // Disegna il prodotto
-                g2d.drawImage(prodotti.get(i).getImage(), xPos, yPos, 50, 50, this);
+                g2d.drawImage(prodotti.get(i).getImage(), xPos, yPos, 80, 80, this);
 
                 // Aggiungi il Rectangle per il prodotto
-                prodottiBounds.add(new Rectangle(xPos, yPos, 50, 50));
+                prodottiBounds.add(new Rectangle(xPos, yPos, 80, 80));
 
                 // Disegna la quantità accanto al prodotto
                 g2d.setColor(Color.BLACK);
                 g2d.setFont(new Font("Arial", Font.BOLD, 16));
                 String quantitaStr = String.valueOf(prodotti.get(i).getQuantita());
-                g2d.drawString(quantitaStr, xPos + 55, yPos + 50);
+                g2d.drawString(quantitaStr, xPos + 70, yPos + 70);
 
                 xPos += 100;
             }

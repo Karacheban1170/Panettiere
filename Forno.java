@@ -82,7 +82,7 @@ public class Forno extends JPanel implements Runnable, MouseListener {
 
         disegnaSfondo(g2d);
 
-        disegnaCornici(g2d);
+        disegnaFornoFrame(g2d);
         cuociProdotto();
 
         disegnaBtnBancone(g2d);
@@ -102,26 +102,26 @@ public class Forno extends JPanel implements Runnable, MouseListener {
         }
     }
 
-    private void disegnaCornici(Graphics2D g2d) {
+    private void disegnaFornoFrame(Graphics2D g2d) {
 
         Graphics2D g2dTrans = (Graphics2D) g2d.create();
         g2dTrans.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));
         // Assumiamo che ingredienti contenga gli oggetti Prodotto
         // Cornice 1 - Forno 1
         Rectangle forno1Frame = new Rectangle(Prodotto.getFixedPositionForno1().x,
-                Prodotto.getFixedPositionForno1().y, 60, 60);
+                Prodotto.getFixedPositionForno1().y, 80, 80);
         g2dTrans.setColor(Color.BLACK); // Colore nero per la prima cornice
         g2dTrans.fill(forno1Frame);
 
         // Cornice 2 - Forno 2
         Rectangle forno2Frame = new Rectangle(Prodotto.getFixedPositionForno2().x,
-                Prodotto.getFixedPositionForno2().y, 60, 60);
+                Prodotto.getFixedPositionForno2().y, 80, 80);
         g2dTrans.setColor(Color.BLACK); // Colore nero per la seconda cornice
         g2dTrans.fill(forno2Frame);
 
         // Cornice Centrale (Rosso)
         Rectangle centraleFrame = new Rectangle(Prodotto.getPositionCentraleNuovoProdotto().x,
-                Prodotto.getPositionCentraleNuovoProdotto().y, 60, 60); // Posizione centrale
+                Prodotto.getPositionCentraleNuovoProdotto().y, 80, 80); // Posizione centrale
         g2dTrans.setColor(Color.RED); // Colore rosso per la cornice centrale
         g2dTrans.fill(centraleFrame);
     }
@@ -244,8 +244,8 @@ public class Forno extends JPanel implements Runnable, MouseListener {
 
         // Imposta la posizione del nuovo prodotto
         nuovoProdotto.setBounds(Prodotto.getPositionCentraleNuovoProdotto().x,
-                Prodotto.getPositionCentraleNuovoProdotto().y, 60,
-                60);
+                Prodotto.getPositionCentraleNuovoProdotto().y, 80,
+                80);
 
     }
 

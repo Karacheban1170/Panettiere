@@ -138,7 +138,7 @@ public class Cliente implements Runnable {
         // Disegna il prodotto desiderato solo se il cliente è al centro del bancone
         if (prodottoDesiderato != null && clienteX >= centroBancone && clienteX <= centroBancone + width) {
             // Disegna l'immagine del prodotto desiderato accanto al cliente
-            g2d.drawImage(prodottoDesiderato.getImage(), clienteX + width + 22, clienteY + 18, 50, 50, null);
+            g2d.drawImage(prodottoDesiderato.getImage(), clienteX + width + 10, clienteY +3, 80, 80, null);
             g2d.setColor(Color.BLACK);
         }
     }

@@ -28,13 +28,13 @@ public class Prodotto extends JComponent implements MouseListener, MouseMotionLi
         this.nome = nome;
         this.immagine = immagine;
         fixedPositionBancone = new Point(0, 0);
-        fixedPositionForno1 = new Point(PanificioFrame.getWidthFrame() / 2 - 100,
-                PanificioFrame.getHeightFrame() / 2 + 30);
+        fixedPositionForno1 = new Point(PanificioFrame.getWidthFrame() / 2 - 120,
+                PanificioFrame.getHeightFrame() / 2 + 10);
         fixedPositionForno2 = new Point(PanificioFrame.getWidthFrame() / 2 + 40,
-                PanificioFrame.getHeightFrame() / 2 + 30);
+                PanificioFrame.getHeightFrame() / 2 + 10);
 
-        positionCentraleNuovoProdotto = new Point(PanificioFrame.getWidthFrame() / 2 - 30,
-                PanificioFrame.getHeightFrame() / 2 + 30);
+        positionCentraleNuovoProdotto = new Point(PanificioFrame.getWidthFrame() / 2 - 40,
+                PanificioFrame.getHeightFrame() / 2 + 10);
 
         addMouseListener(this);
         addMouseMotionListener(this);
@@ -94,6 +94,7 @@ public class Prodotto extends JComponent implements MouseListener, MouseMotionLi
     public static Point getFixedPositionForno2() {
         return fixedPositionForno2;
     }
+
     public static Point getPositionCentraleNuovoProdotto() {
         return positionCentraleNuovoProdotto;
     }
