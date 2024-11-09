@@ -150,7 +150,7 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
 
         for (int i = 0; i < prodotti.size(); i++) {
             if (prodotti.get(i) != null) {
-                //Disegna la cornice del prodotto
+                // Disegna la cornice del prodotto
                 g2d.drawImage(prodottoFrame, xPos, yPos, 80, 80, this);
 
                 // Disegna il prodotto
@@ -162,8 +162,17 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
                 // Disegna la quantità accanto al prodotto
                 g2d.setColor(Color.BLACK);
                 g2d.setFont(new Font("Arial", Font.BOLD, 16));
+
                 String quantitaStr = String.valueOf(prodotti.get(i).getQuantita());
-                g2d.drawString(quantitaStr, xPos + 70, yPos + 70);
+                g2d.fillOval(xPos + 58, yPos + 49, 30, 30);
+
+                g2d.setColor(Color.GREEN);
+
+                if (prodotti.get(i).getQuantita() > 9) {
+                    g2d.drawString(quantitaStr, xPos + 65, yPos + 70);
+                } else {
+                    g2d.drawString(quantitaStr, xPos + 70, yPos + 70);
+                }
 
                 xPos += 100;
             }
@@ -236,6 +245,7 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
             }
         }
     }
+
     @Override
     public void mouseClicked(MouseEvent e) {
     }

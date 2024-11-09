@@ -87,6 +87,10 @@ public class Prodotto extends JComponent implements MouseListener, MouseMotionLi
         this.fixedPositionBancone = fixedPositionBancone;
     }
 
+    public void setPosizioneIniziale() {
+        setLocation(fixedPositionBancone);
+    }
+
     public static Point getFixedPositionForno1() {
         return fixedPositionForno1;
     }

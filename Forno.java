@@ -24,8 +24,19 @@ public class Forno extends JPanel implements Runnable, MouseListener {
     private final ArrayList<Prodotto> ingredienti;
     private final ArrayList<BufferedImage> ingredientiFrame;
     private final ArrayList<Rectangle> ingredientiBounds;
+
     private Prodotto nuovoProdotto;
+    private Rectangle nuovoProdottoBounds;
+
+    private final int secondi;
+    private final int maxValue;
+    private final int minValue;
+
+    private int currentValue;
+
     private final Map<Set<String>, Prodotto> ricette;
+
+
 
     public Forno(int width, int height, ActionListener toPnlBanconeAction) {
         this.width = width;
@@ -43,8 +54,15 @@ public class Forno extends JPanel implements Runnable, MouseListener {
         aggiungiIngredienti();
         caricaRicette();
 
+        nuovoProdottoBounds = new Rectangle();
         btnBanconeBounds = new Rectangle(width - 181, 392, 105, 105);
         this.toPnlBanconeAction = toPnlBanconeAction;
+
+        // Variabili della ProgressBar
+        secondi = 10;
+        maxValue = 100;
+        minValue = 0;
+        currentValue = maxValue;
 
         addMouseListener(this);
         DynamicCursor.setCustomCursors(this);
@@ -55,7 +73,7 @@ public class Forno extends JPanel implements Runnable, MouseListener {
         while (running) {
             try {
                 Thread.sleep(10);
-                DynamicCursor.updateCursor(this, btnBanconeBounds, ingredientiBounds);
+                DynamicCursor.updateCursor(this, btnBanconeBounds, ingredientiBounds, nuovoProdottoBounds);
                 repaint();
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -84,6 +102,7 @@ public class Forno extends JPanel implements Runnable, MouseListener {
 
         disegnaFornoFrame(g2d);
         cuociProdotto();
+        disegnaProgressBar(g2d);
 
         disegnaBtnBancone(g2d);
 
@@ -236,17 +255,47 @@ public class Forno extends JPanel implements Runnable, MouseListener {
     }
 
     private void creaNuovoProdotto(String ingr1, String ingr2, BufferedImage immagine, String nome) {
-        // Rimuove gli ingredienti
-        ingredienti.removeIf(ing -> ing.getNome().equals(ingr1) || ing.getNome().equals(ingr2));
+        for (Prodotto ingrediente : ingredienti) {
+            if (ingrediente.getNome().equals(ingr1) || ingrediente.getNome().equals(ingr2)) {
+                // Riposiziona l'ingrediente alla sua posizione originale
+                ingrediente.setPosizioneIniziale();
+            }
+        }
 
         // Crea il nuovo prodotto ma non lo aggiunge alla lista
         nuovoProdotto = new Prodotto(immagine, nome);
 
-        // Imposta la posizione del nuovo prodotto
+        // Avvia il thread della progress bar senza bloccare il thread principale
+        createAndStartDecrementThread(secondi);
+
+        // Non usare join qui. Non bloccare il thread principale
+        // Aggiungi direttamente la logica di posizionamento del nuovo prodotto
         nuovoProdotto.setBounds(Prodotto.getPositionCentraleNuovoProdotto().x,
                 Prodotto.getPositionCentraleNuovoProdotto().y, 80,
                 80);
 
+        nuovoProdottoBounds = new Rectangle(nuovoProdotto.getX(), nuovoProdotto.getY(), nuovoProdotto.getWidth(),
+                nuovoProdotto.getHeight());
+    }
+
+    private void aggiungiNuovoProdotto(Point mousePosition) {
+        // Verifica se il clic è all'interno dell'area del nuovo prodotto
+        if (nuovoProdotto != null && DynamicCursor.isMouseOverBounds(mousePosition, nuovoProdottoBounds)) {
+            // Recupera il nome del nuovo prodotto da incrementare
+            String nomeNuovoProdotto = nuovoProdotto.getNome();
+
+            // Cerca il prodotto corrispondente nel bancone e incrementa la quantità solo di
+            // quel prodotto
+            for (Prodotto prodotto : Bancone.getProdotti()) {
+                if (prodotto.getNome().equals(nomeNuovoProdotto)) {
+                    prodotto.incrementaQuantita();
+                    break; // Interrompe il ciclo dopo aver trovato e incrementato il prodotto corretto
+                }
+            }
+
+            nuovoProdotto = null;
+            nuovoProdottoBounds = null;
+        }
     }
 
     private void disegnaBtnBancone(Graphics2D g2d) {
@@ -259,6 +308,53 @@ public class Forno extends JPanel implements Runnable, MouseListener {
         }
     }
 
+    public void disegnaProgressBar(Graphics2D g2d) {
+        int progressBarWidth = width / 4;
+        int progressBarHeight = 20;
+        int x = width / 3 + 40;
+        int y = height / 3;
+
+        if (currentValue > 0) {
+            int filledWidth = (int) ((currentValue / 100.0) * progressBarWidth);
+            g2d.setColor(Color.GREEN);
+            g2d.fillRect(x, y, filledWidth, progressBarHeight);
+
+            g2d.setColor(Color.BLACK);
+            g2d.setStroke(new BasicStroke(3));
+            g2d.drawRect(x, y, progressBarWidth, progressBarHeight);
+
+        }
+
+    }
+
+    private void createAndStartDecrementThread(int secondi) {
+        // Crea un thread per la barra di progresso da 100 a 0.
+        Thread progressBarThread = new Thread(() -> {
+            int count = 100;
+            // Calcola il ritardo tra ogni decremento della barra di progresso per completare la progressione in secondi
+            int delay = Math.max(100, (secondi * 1000) / count); // 100 ms min
+    
+            while (count > 0) {
+                try {
+                    Thread.sleep(delay); // Pausa per un certo intervallo di tempo
+                    count--; // Decrementa il valore della progress bar
+    
+                    currentValue = count; // Aggiorna il valore della progress bar in modo thread-safe
+    
+                    // Invoca repaint nel thread della UI per aggiornare la progress bar
+                    SwingUtilities.invokeLater(() -> {
+                        repaint(); // Rende visibile l'aggiornamento del valore della progress bar
+                    });
+    
+                } catch (InterruptedException e) {
+                    e.printStackTrace(); // Gestisce eventuali eccezioni o interruzioni
+                }
+            }
+        });
+    
+        progressBarThread.start(); // Avvia il thread della progress bar
+    }
+    
     @Override
     public void mousePressed(MouseEvent e) {
 
@@ -287,6 +383,7 @@ public class Forno extends JPanel implements Runnable, MouseListener {
                 }
             }
 
+            aggiungiNuovoProdotto(mousePosition);
         }
     }
 

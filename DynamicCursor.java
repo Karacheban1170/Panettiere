@@ -96,7 +96,7 @@ public class DynamicCursor {
 
     // Metodo UpdateCursor per "Forno"
     public static void updateCursor(JPanel panello, Rectangle btnBanconeBounds,
-            ArrayList<Rectangle> ingredientiBounds) {
+            ArrayList<Rectangle> ingredientiBounds, Rectangle nuovoProdottoBounds) {
         Point mousePosition = panello.getMousePosition();
         if (mousePosition != null) {
             String area = "";
@@ -104,6 +104,8 @@ public class DynamicCursor {
             // Determina in quale area si trova il mouse
             if (isMouseOverBounds(mousePosition, btnBanconeBounds)) {
                 area = "btnBancone";
+            } else if (isMouseOverBounds(mousePosition, nuovoProdottoBounds)) {
+                area = "nuovoProdotto";
             } else if (isMouseOverArrayBounds(mousePosition, ingredientiBounds)) {
                 area = "ingredienti";
             }
@@ -113,7 +115,9 @@ public class DynamicCursor {
                 case "btnBancone":
                     panello.setCursor(selectCursor);
                     break;
-
+                case "nuovoProdotto":
+                    panello.setCursor(selectCursor);
+                    break;
                 case "ingredienti":
                     panello.setCursor(selectCursor);
                     break;
@@ -131,7 +135,10 @@ public class DynamicCursor {
     }
 
     public static boolean isMouseOverBounds(Point mousePoint, Rectangle bounds) {
-        return bounds.contains(mousePoint);
+        if(bounds != null){
+            return bounds.contains(mousePoint);
+        }
+        return false;
     }
 
     private static boolean isMouseOverArrayBounds(Point mousePoint, ArrayList<Rectangle> prodottiBounds) {

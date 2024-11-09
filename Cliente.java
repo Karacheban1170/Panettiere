@@ -138,7 +138,7 @@ public class Cliente implements Runnable {
         // Disegna il prodotto desiderato solo se il cliente è al centro del bancone
         if (prodottoDesiderato != null && clienteX >= centroBancone && clienteX <= centroBancone + width) {
             // Disegna l'immagine del prodotto desiderato accanto al cliente
-            g2d.drawImage(prodottoDesiderato.getImage(), clienteX + width + 10, clienteY +3, 80, 80, null);
+            g2d.drawImage(prodottoDesiderato.getImage(), clienteX + width + 10, clienteY + 3, 80, 80, null);
             g2d.setColor(Color.BLACK);
         }
     }
@@ -152,13 +152,13 @@ public class Cliente implements Runnable {
         if (currentValue > 0) {
             if (!prodottoComprato) {
 
-                g2d.setColor(Color.BLACK);
-                g2d.drawRect(x, y, progressBarWidth, progressBarHeight);
-
                 int filledWidth = (int) ((currentValue / 100.0) * progressBarWidth);
-
                 g2d.setColor(Color.GREEN);
                 g2d.fillRect(x, y, filledWidth, progressBarHeight);
+
+                g2d.setColor(Color.BLACK);
+                g2d.setStroke(new BasicStroke(3));
+                g2d.drawRect(x, y, progressBarWidth, progressBarHeight);
             }
         }
 
@@ -247,7 +247,7 @@ public class Cliente implements Runnable {
         return clienteEntrato;
     }
 
-    public boolean isSoddisfatto(){
+    public boolean isSoddisfatto() {
         return soddisfatto;
     }
 
