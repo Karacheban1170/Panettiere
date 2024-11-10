@@ -28,15 +28,11 @@ public class Forno extends JPanel implements Runnable, MouseListener {
     private Prodotto nuovoProdotto;
     private Rectangle nuovoProdottoBounds;
 
+    private final ProgressBar progressBar;
+    private final Color GREEN_COLOR;
     private final int secondi;
-    private final int maxValue;
-    private final int minValue;
-
-    private int currentValue;
 
     private final Map<Set<String>, Prodotto> ricette;
-
-
 
     public Forno(int width, int height, ActionListener toPnlBanconeAction) {
         this.width = width;
@@ -58,11 +54,12 @@ public class Forno extends JPanel implements Runnable, MouseListener {
         btnBanconeBounds = new Rectangle(width - 181, 392, 105, 105);
         this.toPnlBanconeAction = toPnlBanconeAction;
 
-        // Variabili della ProgressBar
+        // Inizializza la barra di progresso e aggiungila al pannello
+        GREEN_COLOR = new Color(0, 255, 0, 200);
         secondi = 10;
-        maxValue = 100;
-        minValue = 0;
-        currentValue = maxValue;
+        progressBar = new ProgressBar(0, 100);
+        progressBar.setPreferredSize(new Dimension(width / 2, 20));
+        progressBar.setProgressColor(GREEN_COLOR);
 
         addMouseListener(this);
         DynamicCursor.setCustomCursors(this);
@@ -266,7 +263,14 @@ public class Forno extends JPanel implements Runnable, MouseListener {
         nuovoProdotto = new Prodotto(immagine, nome);
 
         // Avvia il thread della progress bar senza bloccare il thread principale
-        createAndStartDecrementThread(secondi);
+        Thread progressBarThread = createAndStartDecrementThread(secondi);
+
+        // Una volta entrato, il cliente si ferma e aspetta un momento
+        try {
+            progressBarThread.join();
+        } catch (InterruptedException e) {
+            e.getMessage();
+        }
 
         // Non usare join qui. Non bloccare il thread principale
         // Aggiungi direttamente la logica di posizionamento del nuovo prodotto
@@ -314,47 +318,49 @@ public class Forno extends JPanel implements Runnable, MouseListener {
         int x = width / 3 + 40;
         int y = height / 3;
 
-        if (currentValue > 0) {
-            int filledWidth = (int) ((currentValue / 100.0) * progressBarWidth);
-            g2d.setColor(Color.GREEN);
+        if (progressBar.getValue() > 0) {
+            int filledWidth = (int) ((progressBar.getValue() / 100.0) * progressBarWidth);
+
+            g2d.setColor(progressBar.getProgressColor());
             g2d.fillRect(x, y, filledWidth, progressBarHeight);
 
             g2d.setColor(Color.BLACK);
             g2d.setStroke(new BasicStroke(3));
             g2d.drawRect(x, y, progressBarWidth, progressBarHeight);
-
         }
 
     }
 
-    private void createAndStartDecrementThread(int secondi) {
+    private Thread createAndStartDecrementThread(int secondi) {
+
         // Crea un thread per la barra di progresso da 100 a 0.
-        Thread progressBarThread = new Thread(() -> {
-            int count = 100;
-            // Calcola il ritardo tra ogni decremento della barra di progresso per completare la progressione in secondi
-            int delay = Math.max(100, (secondi * 1000) / count); // 100 ms min
-    
-            while (count > 0) {
-                try {
-                    Thread.sleep(delay); // Pausa per un certo intervallo di tempo
-                    count--; // Decrementa il valore della progress bar
-    
-                    currentValue = count; // Aggiorna il valore della progress bar in modo thread-safe
-    
-                    // Invoca repaint nel thread della UI per aggiornare la progress bar
-                    SwingUtilities.invokeLater(() -> {
-                        repaint(); // Rende visibile l'aggiornamento del valore della progress bar
-                    });
-    
-                } catch (InterruptedException e) {
-                    e.printStackTrace(); // Gestisce eventuali eccezioni o interruzioni
+        Thread progressBarThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                // Calcola il ritardo tra ogni decremento della barra di progresso per
+                // completare la progressione in secondi.
+                // secondi * 1000 converte il tempo totale di attesa da secondi a
+                // millisecondi (poiché 1 secondo = 1000 ms).
+                // Dividendo per 100 otteniamo l'intervallo di tempo per ridurre di un'unità
+                int count = 100;
+                int delay = (secondi * 1000) / count;
+                while (count > 0) {
+                    try {
+                        Thread.sleep(delay);
+                        count--;
+                        progressBar.setValue(count);
+                    } catch (InterruptedException e) {
+                        e.getMessage();
+                    }
                 }
             }
         });
-    
-        progressBarThread.start(); // Avvia il thread della progress bar
+        progressBarThread.start();
+
+        // Restituiamo il thread per poter fare join() nel metodo run()
+        return progressBarThread;
     }
-    
+
     @Override
     public void mousePressed(MouseEvent e) {
 

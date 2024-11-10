@@ -33,11 +33,10 @@ public class Cliente implements Runnable {
     private boolean clienteAspetta;
     private static boolean clienteEntrato;
 
-    private final int secondi;
-    private final int maxValue;
-    private final int minValue;
+    private final ProgressBar progressBar;
+    private final Color GREEN_COLOR;
 
-    private int currentValue;
+    private final int secondi;
 
     public Cliente(BufferedImage imgCliente, PanificioMonitor panificioMonitor, String nome,
             ArrayList<Prodotto> prodotti) {
@@ -59,21 +58,21 @@ public class Cliente implements Runnable {
         clienteAspetta = false;
         clienteEntrato = false;
 
-        // Variabili della ProgressBar
-        secondi = 10;
-        maxValue = 100;
-        minValue = 0;
-        currentValue = maxValue;
-
         centroBancone = PanificioFrame.getWidthFrame() / 2 - width / 2;
         nuvola = ImageLoader.loadImage("img/nuvola.png");
+
+        // Inizializza la barra di progresso e aggiungila al pannello
+        GREEN_COLOR = new Color(0, 255, 0, 200);
+        secondi = 10;
+        progressBar = new ProgressBar(0, 100);
+        progressBar.setPreferredSize(new Dimension(width / 2, 20));
+        progressBar.setProgressColor(GREEN_COLOR);
     }
 
     @Override
     public void run() {
         while (running) {
             entraCliente();
-            System.out.println(nome + " desidera acquistare: un/a " + prodottoDesiderato.getNome());
             Thread progressBarThread = createAndStartDecrementThread(secondi);
 
             // Una volta entrato, il cliente si ferma e aspetta un momento
@@ -149,11 +148,11 @@ public class Cliente implements Runnable {
         int x = clienteX;
         int y = 80;
 
-        if (currentValue > 0) {
+        if (progressBar.getValue() > 0) {
             if (!prodottoComprato) {
+                int filledWidth = (int) ((progressBar.getValue() / 100.0) * progressBarWidth);
 
-                int filledWidth = (int) ((currentValue / 100.0) * progressBarWidth);
-                g2d.setColor(Color.GREEN);
+                g2d.setColor(progressBar.getProgressColor());
                 g2d.fillRect(x, y, filledWidth, progressBarHeight);
 
                 g2d.setColor(Color.BLACK);
@@ -168,7 +167,6 @@ public class Cliente implements Runnable {
 
         // Crea un thread per la barra di progresso da 100 a 0.
         Thread progressBarThread = new Thread(new Runnable() {
-
             @Override
             public void run() {
                 // Calcola il ritardo tra ogni decremento della barra di progresso per
@@ -178,22 +176,13 @@ public class Cliente implements Runnable {
                 // Dividendo per 100 otteniamo l'intervallo di tempo per ridurre di un'unità
                 int count = 100;
                 int delay = (secondi * 1000) / count;
-
                 while (count > 0) {
                     if (prodottoComprato)
                         break;
                     try {
                         Thread.sleep(delay);
                         count--;
-
-                        if (count > maxValue) {
-                            return;
-                        }
-                        if (count < minValue) {
-                            return;
-                        }
-
-                        currentValue = count;
+                        progressBar.setValue(count);
                     } catch (InterruptedException e) {
                         e.getMessage();
                     }

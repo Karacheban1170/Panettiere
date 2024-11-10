@@ -2,6 +2,13 @@
 	"configurations": [
 		{
 			"type": "java",
+			"name": "CustomProgressBarTest",
+			"request": "launch",
+			"mainClass": "CustomProgressBarTest",
+			"projectName": "Panificio_7fe1fc69"
+		},
+		{
+			"type": "java",
 			"name": "DragExample",
 			"request": "launch",
 			"mainClass": "DragExample",
