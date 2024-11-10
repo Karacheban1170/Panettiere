@@ -34,9 +34,9 @@ public class Cliente implements Runnable {
     private static boolean clienteEntrato;
 
     private final ProgressBar progressBar;
-    private final Color GREEN_COLOR;
 
-    private final int secondi;
+    private static final Color GREEN_COLOR = new Color(0, 255, 0, 200);
+    private static final int SECONDI_ATTESA = 10;
 
     public Cliente(BufferedImage imgCliente, PanificioMonitor panificioMonitor, String nome,
             ArrayList<Prodotto> prodotti) {
@@ -62,8 +62,7 @@ public class Cliente implements Runnable {
         nuvola = ImageLoader.loadImage("img/nuvola.png");
 
         // Inizializza la barra di progresso e aggiungila al pannello
-        GREEN_COLOR = new Color(0, 255, 0, 200);
-        secondi = 10;
+
         progressBar = new ProgressBar(0, 100);
         progressBar.setPreferredSize(new Dimension(width / 2, 20));
         progressBar.setProgressColor(GREEN_COLOR);
@@ -73,7 +72,7 @@ public class Cliente implements Runnable {
     public void run() {
         while (running) {
             entraCliente();
-            Thread progressBarThread = createAndStartDecrementThread(secondi);
+            Thread progressBarThread = createAndStartDecrementThread(SECONDI_ATTESA);
 
             // Una volta entrato, il cliente si ferma e aspetta un momento
             try {
@@ -224,6 +223,11 @@ public class Cliente implements Runnable {
                 e.getMessage();
             }
         }
+        if (soddisfatto) {
+            System.out.println(nome + " e' stato soddisfatto: ");
+        } else {
+            System.out.println(nome + " non e' stato soddisfatto: ");
+        }
         panificioMonitor.exitPanificio(nome);
         stop();
     }
@@ -266,11 +270,6 @@ public class Cliente implements Runnable {
 
     public void setSoddisfatto(boolean stato) {
         this.soddisfatto = stato;
-        if (stato) {
-            System.out.println(nome + " e' stato soddisfatto: ");
-        } else {
-            System.out.println(nome + " non e' stato soddisfatto: ");
-        }
     }
 
     public void setProdottoComprato(boolean stato) {

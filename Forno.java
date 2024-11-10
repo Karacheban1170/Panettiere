@@ -26,13 +26,13 @@ public class Forno extends JPanel implements Runnable, MouseListener {
     private final ArrayList<Rectangle> ingredientiBounds;
 
     private Prodotto nuovoProdotto;
-    private Rectangle nuovoProdottoBounds;
+    private static Rectangle nuovoProdottoBounds;
 
-    private final ProgressBar progressBar;
-    private final Color GREEN_COLOR;
-    private final int secondi;
+    private static boolean prodottoStaCuocendo;
 
     private final Map<Set<String>, Prodotto> ricette;
+
+    private static final Color GREEN_COLOR = new Color(0, 255, 0, 200);
 
     public Forno(int width, int height, ActionListener toPnlBanconeAction) {
         this.width = width;
@@ -46,6 +46,7 @@ public class Forno extends JPanel implements Runnable, MouseListener {
         ingredientiBounds = new ArrayList<>(ingredienti.size());
         ingredientiFrame = new ArrayList<>(ingredienti.size());
         nuovoProdotto = null;
+        prodottoStaCuocendo = false;
         ricette = new HashMap<>();
         aggiungiIngredienti();
         caricaRicette();
@@ -53,13 +54,6 @@ public class Forno extends JPanel implements Runnable, MouseListener {
         nuovoProdottoBounds = new Rectangle();
         btnBanconeBounds = new Rectangle(width - 181, 392, 105, 105);
         this.toPnlBanconeAction = toPnlBanconeAction;
-
-        // Inizializza la barra di progresso e aggiungila al pannello
-        GREEN_COLOR = new Color(0, 255, 0, 200);
-        secondi = 10;
-        progressBar = new ProgressBar(0, 100);
-        progressBar.setPreferredSize(new Dimension(width / 2, 20));
-        progressBar.setProgressColor(GREEN_COLOR);
 
         addMouseListener(this);
         DynamicCursor.setCustomCursors(this);
@@ -99,12 +93,17 @@ public class Forno extends JPanel implements Runnable, MouseListener {
 
         disegnaFornoFrame(g2d);
         cuociProdotto();
-        disegnaProgressBar(g2d);
+
+        if (nuovoProdotto != null) {
+            nuovoProdotto.disegnaProgressBar(g2d);
+        }
 
         disegnaBtnBancone(g2d);
 
         disegnaIngredientiFrame(g2d);
         disegnaIngredienti(g2d);
+
+        disegnaProdottiDisponibili(g2d);
 
         FadingScene.disegnaFadingRect(g2d);
     }
@@ -140,39 +139,6 @@ public class Forno extends JPanel implements Runnable, MouseListener {
                 Prodotto.getPositionCentraleNuovoProdotto().y, 80, 80); // Posizione centrale
         g2dTrans.setColor(Color.RED); // Colore rosso per la cornice centrale
         g2dTrans.fill(centraleFrame);
-    }
-
-    private void aggiungiIngredienti() {
-        int startX = width / 4; // Coordinata iniziale x centrata dinamicamente
-        int yPos = 400; // Posizione fissa verticale
-
-        ingredientiFrame.add(ImageLoader.loadImage("img/ingredienteFrame1.png"));
-        ingredientiFrame.add(ImageLoader.loadImage("img/ingredienteFrame2.png"));
-        ingredientiFrame.add(ImageLoader.loadImage("img/ingredienteFrame3.png"));
-        ingredientiFrame.add(ImageLoader.loadImage("img/ingredienteFrame4.png"));
-        ingredientiFrame.add(ImageLoader.loadImage("img/ingredienteFrame5.png"));
-
-        // Aggiungi ingredienti con posizioni calcolate dinamicamente
-        ingredienti.add(new Prodotto(ImageLoader.loadImage("img/ingrediente1.png"), "acqua"));
-        ingredienti.add(new Prodotto(ImageLoader.loadImage("img/ingrediente2.png"), "farina"));
-        ingredienti.add(new Prodotto(ImageLoader.loadImage("img/ingrediente3.png"), "latte"));
-        ingredienti.add(new Prodotto(ImageLoader.loadImage("img/ingrediente4.png"), "uova"));
-        ingredienti.add(new Prodotto(ImageLoader.loadImage("img/ingrediente5.png"), "cioccolato"));
-
-        int offsetX = 100; // Distanza orizzontale tra ingredienti
-        int currentX = startX;
-
-        for (int i = 0; i < ingredienti.size(); i++) {
-            Prodotto ingrediente = ingredienti.get(i);
-
-            ingrediente.setBounds(currentX, yPos, 80, 80);
-            ingrediente.setFixedPositionBancone(new Point(currentX, yPos));
-
-            ingredientiBounds.add(ingrediente.getBounds());
-            add(ingrediente);
-
-            currentX += offsetX;
-        }
     }
 
     private void disegnaIngredientiFrame(Graphics2D g2d) {
@@ -221,6 +187,85 @@ public class Forno extends JPanel implements Runnable, MouseListener {
 
     }
 
+    private void disegnaBtnBancone(Graphics2D g2d) {
+        if (btnBancone != null) {
+            g2d.drawImage(btnBancone, btnBancone.getWidth() + 270, btnBancone.getHeight() - 118, 125, 125,
+                    this);
+        } else {
+            g2d.setColor(Color.BLACK);
+            g2d.fillRect(width - 40, 100, width, height);
+        }
+    }
+
+    private void disegnaProdottiDisponibili(Graphics2D g2d) {
+        int xPos = 25;
+        int yPos = 30;
+        int sizeProdotto = 50;
+
+        BufferedImage prodottoFrame = Bancone.getProdottoFrame();
+        ArrayList <Prodotto> prodotti = Bancone.getProdotti();
+
+        for (int i = 0; i < prodotti.size(); i++) {
+            if (prodotti.get(i) != null) {
+                /// Disegna la cornice del prodotto
+                g2d.drawImage(prodottoFrame, xPos, yPos, sizeProdotto, sizeProdotto, this);
+
+                // Disegna il prodotto
+                g2d.drawImage(prodotti.get(i).getImage(), xPos, yPos, sizeProdotto, sizeProdotto, this);
+
+                // Disegna la quantità accanto al prodotto
+                g2d.setColor(Color.BLACK);
+                g2d.setFont(new Font("Arial", Font.BOLD, 15));
+
+                String quantitaStr = String.valueOf(prodotti.get(i).getQuantita());
+                g2d.fillOval(xPos + 33, yPos + 31, 25, 25);
+
+                g2d.setColor(GREEN_COLOR);
+
+                if (prodotti.get(i).getQuantita() > 9) {
+                    g2d.drawString(quantitaStr, xPos + 38, yPos + 50);
+                } else {
+                    g2d.drawString(quantitaStr, xPos + 43, yPos + 50);
+                }
+
+                yPos += 70;
+            }
+        }
+    }
+
+    private void aggiungiIngredienti() {
+        int startX = width / 4; // Coordinata iniziale x centrata dinamicamente
+        int yPos = 400; // Posizione fissa verticale
+
+        ingredientiFrame.add(ImageLoader.loadImage("img/ingredienteFrame1.png"));
+        ingredientiFrame.add(ImageLoader.loadImage("img/ingredienteFrame2.png"));
+        ingredientiFrame.add(ImageLoader.loadImage("img/ingredienteFrame3.png"));
+        ingredientiFrame.add(ImageLoader.loadImage("img/ingredienteFrame4.png"));
+        ingredientiFrame.add(ImageLoader.loadImage("img/ingredienteFrame5.png"));
+
+        // Aggiungi ingredienti con posizioni calcolate dinamicamente
+        ingredienti.add(new Prodotto(ImageLoader.loadImage("img/ingrediente1.png"), "acqua"));
+        ingredienti.add(new Prodotto(ImageLoader.loadImage("img/ingrediente2.png"), "farina"));
+        ingredienti.add(new Prodotto(ImageLoader.loadImage("img/ingrediente3.png"), "latte"));
+        ingredienti.add(new Prodotto(ImageLoader.loadImage("img/ingrediente4.png"), "uova"));
+        ingredienti.add(new Prodotto(ImageLoader.loadImage("img/ingrediente5.png"), "cioccolato"));
+
+        int offsetX = 100; // Distanza orizzontale tra ingredienti
+        int currentX = startX;
+
+        for (int i = 0; i < ingredienti.size(); i++) {
+            Prodotto ingrediente = ingredienti.get(i);
+
+            ingrediente.setBounds(currentX, yPos, 80, 80);
+            ingrediente.setFixedPositionBancone(new Point(currentX, yPos));
+
+            ingredientiBounds.add(ingrediente.getBounds());
+            add(ingrediente);
+
+            currentX += offsetX;
+        }
+    }
+
     private void caricaRicette() {
         // Crea le ricette usando coppie di ingredienti
         ricette.put(Set.of("farina", "latte"), new Prodotto(ImageLoader.loadImage("img/prodotto1.png"), "ciambella"));
@@ -260,26 +305,18 @@ public class Forno extends JPanel implements Runnable, MouseListener {
         }
 
         // Crea il nuovo prodotto ma non lo aggiunge alla lista
-        nuovoProdotto = new Prodotto(immagine, nome);
+        nuovoProdotto = new Prodotto(immagine, nome, 1);
 
-        // Avvia il thread della progress bar senza bloccare il thread principale
-        Thread progressBarThread = createAndStartDecrementThread(secondi);
-
-        // Una volta entrato, il cliente si ferma e aspetta un momento
-        try {
-            progressBarThread.join();
-        } catch (InterruptedException e) {
-            e.getMessage();
-        }
-
-        // Non usare join qui. Non bloccare il thread principale
         // Aggiungi direttamente la logica di posizionamento del nuovo prodotto
-        nuovoProdotto.setBounds(Prodotto.getPositionCentraleNuovoProdotto().x,
-                Prodotto.getPositionCentraleNuovoProdotto().y, 80,
-                80);
+        nuovoProdotto.setBounds(-200, 0, 80, 80);
 
         nuovoProdottoBounds = new Rectangle(nuovoProdotto.getX(), nuovoProdotto.getY(), nuovoProdotto.getWidth(),
                 nuovoProdotto.getHeight());
+
+        Thread nuovoProdottoTh = new Thread(nuovoProdotto);
+        nuovoProdottoTh.start();
+        prodottoStaCuocendo = true;
+
     }
 
     private void aggiungiNuovoProdotto(Point mousePosition) {
@@ -300,65 +337,6 @@ public class Forno extends JPanel implements Runnable, MouseListener {
             nuovoProdotto = null;
             nuovoProdottoBounds = null;
         }
-    }
-
-    private void disegnaBtnBancone(Graphics2D g2d) {
-        if (btnBancone != null) {
-            g2d.drawImage(btnBancone, btnBancone.getWidth() + 270, btnBancone.getHeight() - 118, 125, 125,
-                    this);
-        } else {
-            g2d.setColor(Color.BLACK);
-            g2d.fillRect(width - 40, 100, width, height);
-        }
-    }
-
-    public void disegnaProgressBar(Graphics2D g2d) {
-        int progressBarWidth = width / 4;
-        int progressBarHeight = 20;
-        int x = width / 3 + 40;
-        int y = height / 3;
-
-        if (progressBar.getValue() > 0) {
-            int filledWidth = (int) ((progressBar.getValue() / 100.0) * progressBarWidth);
-
-            g2d.setColor(progressBar.getProgressColor());
-            g2d.fillRect(x, y, filledWidth, progressBarHeight);
-
-            g2d.setColor(Color.BLACK);
-            g2d.setStroke(new BasicStroke(3));
-            g2d.drawRect(x, y, progressBarWidth, progressBarHeight);
-        }
-
-    }
-
-    private Thread createAndStartDecrementThread(int secondi) {
-
-        // Crea un thread per la barra di progresso da 100 a 0.
-        Thread progressBarThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                // Calcola il ritardo tra ogni decremento della barra di progresso per
-                // completare la progressione in secondi.
-                // secondi * 1000 converte il tempo totale di attesa da secondi a
-                // millisecondi (poiché 1 secondo = 1000 ms).
-                // Dividendo per 100 otteniamo l'intervallo di tempo per ridurre di un'unità
-                int count = 100;
-                int delay = (secondi * 1000) / count;
-                while (count > 0) {
-                    try {
-                        Thread.sleep(delay);
-                        count--;
-                        progressBar.setValue(count);
-                    } catch (InterruptedException e) {
-                        e.getMessage();
-                    }
-                }
-            }
-        });
-        progressBarThread.start();
-
-        // Restituiamo il thread per poter fare join() nel metodo run()
-        return progressBarThread;
     }
 
     @Override
@@ -391,6 +369,18 @@ public class Forno extends JPanel implements Runnable, MouseListener {
 
             aggiungiNuovoProdotto(mousePosition);
         }
+    }
+
+    public static Rectangle getNuovoProdottoBounds() {
+        return nuovoProdottoBounds;
+    }
+
+    public static boolean isProdottoStaCuocendo() {
+        return prodottoStaCuocendo;
+    }
+
+    public static void setProdottoStaCuocendo(boolean state) {
+        prodottoStaCuocendo = state;
     }
 
 }

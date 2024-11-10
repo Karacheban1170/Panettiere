@@ -119,7 +119,11 @@ public class DynamicCursor {
                     panello.setCursor(selectCursor);
                     break;
                 case "ingredienti":
-                    panello.setCursor(selectCursor);
+                    if (!Forno.isProdottoStaCuocendo()) {
+                        panello.setCursor(selectCursor);
+                    } else {
+                        panello.setCursor(transparentSelectCursor);
+                    }
                     break;
 
                 default:
@@ -135,7 +139,7 @@ public class DynamicCursor {
     }
 
     public static boolean isMouseOverBounds(Point mousePoint, Rectangle bounds) {
-        if(bounds != null){
+        if (bounds != null) {
             return bounds.contains(mousePoint);
         }
         return false;

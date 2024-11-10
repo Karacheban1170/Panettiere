@@ -25,10 +25,12 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
     private final int numClienti;
 
     private static ArrayList<Prodotto> prodotti;
-    private final BufferedImage prodottoFrame;
+    private static BufferedImage prodottoFrame;
     private final ArrayList<Rectangle> prodottiBounds;
     private final int numProdotti;
     private final int quantitaProdotti;
+
+    private static final Color GREEN_COLOR = new Color(0, 255, 0, 200);
 
     private final BufferedImage[] immaginiClienti = {
             ImageLoader.loadImage("img/cliente1.png"),
@@ -52,9 +54,9 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
 
         panificioMonitor = new PanificioMonitor();
 
-        numClienti = 6;
+        numClienti = 10;
         numProdotti = 4;
-        quantitaProdotti = 5;
+        quantitaProdotti = 2;
 
         prodotti = new ArrayList<>(numProdotti);
         prodottiBounds = new ArrayList<>(prodotti.size());
@@ -147,26 +149,27 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
     private void disegnaProdotti(Graphics2D g2d) {
         int xPos = width / 2 - 195;
         int yPos = 405;
+        int sizeProdotto = 80;
 
         for (int i = 0; i < prodotti.size(); i++) {
             if (prodotti.get(i) != null) {
                 // Disegna la cornice del prodotto
-                g2d.drawImage(prodottoFrame, xPos, yPos, 80, 80, this);
+                g2d.drawImage(prodottoFrame, xPos, yPos, sizeProdotto, sizeProdotto, this);
 
                 // Disegna il prodotto
-                g2d.drawImage(prodotti.get(i).getImage(), xPos, yPos, 80, 80, this);
+                g2d.drawImage(prodotti.get(i).getImage(), xPos, yPos, sizeProdotto, sizeProdotto, this);
 
                 // Aggiungi il Rectangle per il prodotto
-                prodottiBounds.add(new Rectangle(xPos, yPos, 80, 80));
+                prodottiBounds.add(new Rectangle(xPos, yPos, sizeProdotto, sizeProdotto));
 
                 // Disegna la quantità accanto al prodotto
                 g2d.setColor(Color.BLACK);
                 g2d.setFont(new Font("Arial", Font.BOLD, 16));
 
                 String quantitaStr = String.valueOf(prodotti.get(i).getQuantita());
-                g2d.fillOval(xPos + 58, yPos + 49, 30, 30);
+                g2d.fillOval(xPos + 58, yPos + 49, 31, 31);
 
-                g2d.setColor(Color.GREEN);
+                g2d.setColor(GREEN_COLOR);
 
                 if (prodotti.get(i).getQuantita() > 9) {
                     g2d.drawString(quantitaStr, xPos + 65, yPos + 70);
@@ -202,12 +205,12 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
 
     public void initClienti() {
         clienti = new ArrayList<>();
-        Random imgRandom = new Random();
+        Random rand = new Random();
         ArrayList<Thread> threads = new ArrayList<>();
 
         for (int i = 0; i < numClienti; i++) {
 
-            Cliente cliente = new Cliente(immaginiClienti[imgRandom.nextInt(immaginiClienti.length)],
+            Cliente cliente = new Cliente(immaginiClienti[rand.nextInt(immaginiClienti.length)],
                     panificioMonitor, "Cliente " + (i + 1), prodotti);
             clienti.add(cliente);
 
@@ -224,6 +227,9 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
         for (int i = 0; i < prodottiBounds.size(); i++) {
             if (prodottiBounds.get(i).contains(mousePosition)) {
                 Prodotto prodottoSelezionato = prodotti.get(i);
+                if (prodottoSelezionato.getQuantita() == 0) {
+                    break;
+                }
 
                 // Verifica se il cliente desidera questo prodotto
                 for (Cliente cliente : clienti) {
@@ -288,5 +294,9 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
      */
     public static ArrayList<Prodotto> getProdotti() {
         return prodotti;
+    }
+
+    public static BufferedImage getProdottoFrame() {
+        return prodottoFrame;
     }
 }

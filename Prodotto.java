@@ -3,7 +3,7 @@ import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import javax.swing.JComponent;
 
-public class Prodotto extends JComponent implements MouseListener, MouseMotionListener {
+public class Prodotto extends JComponent implements Runnable, MouseListener, MouseMotionListener {
     private final BufferedImage immagine;
     private int quantita;
     private final String nome;
@@ -18,12 +18,28 @@ public class Prodotto extends JComponent implements MouseListener, MouseMotionLi
     private static Point fixedPositionForno2;
     private static Point positionCentraleNuovoProdotto;
 
+    private Thread prodottoThread;
+    private boolean running = true;
+
+    private ProgressBar progressBar;
+
+    private static final Color GREEN_COLOR = new Color(0, 255, 0, 200);
+    private static final int SECONDI_COTTURA = 10;
+
+    // Prodotto nel panello "Bancone"
     public Prodotto(BufferedImage immagine, String nome, int quantita) {
         this.immagine = immagine;
         this.nome = nome;
         this.quantita = quantita;
+
+        // Inizializza la barra di progresso e aggiungila al pannello
+        progressBar = new ProgressBar(0, 100);
+        progressBar.setPreferredSize(new Dimension(PanificioFrame.getWidthFrame() / 2, 20));
+        progressBar.setProgressColor(GREEN_COLOR);
+
     }
 
+    // Ingrediente nel panello "Forno"
     public Prodotto(BufferedImage immagine, String nome) {
         this.nome = nome;
         this.immagine = immagine;
@@ -39,6 +55,38 @@ public class Prodotto extends JComponent implements MouseListener, MouseMotionLi
         addMouseListener(this);
         addMouseMotionListener(this);
         setLocation(fixedPositionBancone); // Posizione iniziale
+    }
+
+    @Override
+    public void run() {
+        while (running) {
+            Thread progressBarThread = createAndStartDecrementThread(SECONDI_COTTURA);
+
+            // Una volta entrato, il cliente si ferma e aspetta un momento
+            try {
+                progressBarThread.join();
+                setLocation(new Point(positionCentraleNuovoProdotto));
+                Forno.setProdottoStaCuocendo(false);
+                Forno.getNuovoProdottoBounds().setLocation(new Point(positionCentraleNuovoProdotto));
+                stop();
+            } catch (InterruptedException e) {
+                e.getMessage();
+            }
+        }
+    }
+
+    public synchronized void start() {
+        if (prodottoThread == null || !prodottoThread.isAlive()) {
+            prodottoThread = new Thread(this);
+            prodottoThread.start();
+        }
+    }
+
+    public synchronized void stop() {
+        running = false;
+        if (prodottoThread != null) {
+            prodottoThread.interrupt();
+        }
     }
 
     @Override
@@ -66,15 +114,17 @@ public class Prodotto extends JComponent implements MouseListener, MouseMotionLi
 
     @Override
     public void mouseDragged(MouseEvent e) {
-        int thisX = getLocation().x;
-        int thisY = getLocation().y;
+        if (!Forno.isProdottoStaCuocendo()) {
+            int thisX = getLocation().x;
+            int thisY = getLocation().y;
 
-        xMoved = e.getX() - initialClick.x;
-        yMoved = e.getY() - initialClick.y;
+            xMoved = e.getX() - initialClick.x;
+            yMoved = e.getY() - initialClick.y;
 
-        int X = thisX + xMoved;
-        int Y = thisY + yMoved;
-        setLocation(X, Y);
+            int X = thisX + xMoved;
+            int Y = thisY + yMoved;
+            setLocation(X, Y);
+        }
     }
 
     private double calculateDistance(Point p1, Point p2) {
@@ -125,6 +175,55 @@ public class Prodotto extends JComponent implements MouseListener, MouseMotionLi
         }
     }
 
+    public void disegnaProgressBar(Graphics2D g2d) {
+        int progressBarWidth = PanificioFrame.getWidthFrame() / 4;
+        int progressBarHeight = 20;
+        int x = PanificioFrame.getWidthFrame() / 3 + 40;
+        int y = PanificioFrame.getHeightFrame() / 3;
+
+        if (progressBar.getValue() > 0) {
+            int filledWidth = (int) ((progressBar.getValue() / 100.0) * progressBarWidth);
+
+            g2d.setColor(progressBar.getProgressColor());
+            g2d.fillRect(x, y, filledWidth, progressBarHeight);
+
+            g2d.setColor(Color.BLACK);
+            g2d.setStroke(new BasicStroke(3));
+            g2d.drawRect(x, y, progressBarWidth, progressBarHeight);
+        }
+
+    }
+
+    private Thread createAndStartDecrementThread(int secondi) {
+
+        // Crea un thread per la barra di progresso da 100 a 0.
+        Thread progressBarThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                // Calcola il ritardo tra ogni decremento della barra di progresso per
+                // completare la progressione in secondi.
+                // secondi * 1000 converte il tempo totale di attesa da secondi a
+                // millisecondi (poiché 1 secondo = 1000 ms).
+                // Dividendo per 100 otteniamo l'intervallo di tempo per ridurre di un'unità
+                int count = 100;
+                int delay = (secondi * 1000) / count;
+                while (count > 0) {
+                    try {
+                        Thread.sleep(delay);
+                        count--;
+                        progressBar.setValue(count);
+                    } catch (InterruptedException e) {
+                        e.getMessage();
+                    }
+                }
+            }
+        });
+        progressBarThread.start();
+
+        // Restituiamo il thread per poter fare join() nel metodo run()
+        return progressBarThread;
+    }
+
     @Override
     public void mouseClicked(MouseEvent e) {
     }
@@ -140,4 +239,5 @@ public class Prodotto extends JComponent implements MouseListener, MouseMotionLi
     @Override
     public void mouseMoved(MouseEvent e) {
     }
+
 }
