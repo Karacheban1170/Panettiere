@@ -18,6 +18,7 @@ public class Panificio extends JPanel implements Runnable, FocusListener, MouseL
     private final BufferedImage bancone;
 
     private final Rectangle banconeBounds;
+    private final Rectangle portaBounds;
 
     private ActionListener toPnlBanconeAction;
 
@@ -29,6 +30,7 @@ public class Panificio extends JPanel implements Runnable, FocusListener, MouseL
 
         panettiere = new Panettiere(this);
 
+        portaBounds = new Rectangle(width - 200, height - 100, 150, 50);
         banconeBounds = new Rectangle((width / 2) - 230, (height / 2) + 45, 400, 100);
 
         this.toPnlBanconeAction = toPnlBanconeAction;
@@ -78,6 +80,8 @@ public class Panificio extends JPanel implements Runnable, FocusListener, MouseL
         if (!focussed) {
             paintIstruzioni(g2d);
         }
+
+        
 
         FadingScene.disegnaFadingRect(g2d);
     }
@@ -149,6 +153,13 @@ public class Panificio extends JPanel implements Runnable, FocusListener, MouseL
         }
     }
 
+    private void paintScoreFinale(Graphics2D g2d){
+        g2d.setColor(new Color(0, 0, 0, 150));
+        g2d.fillRect(0, 0, width, height); 
+
+
+    }
+
     @Override
     public void focusGained(FocusEvent e) {
         focussed = true;
@@ -184,7 +195,8 @@ public class Panificio extends JPanel implements Runnable, FocusListener, MouseL
     public void mouseReleased(MouseEvent e) {
         if (clickAllowed && e.getButton() == MouseEvent.BUTTON1) {
             Point mousePosition = e.getPoint();
-            if (DynamicCursor.isMouseOverBounds(mousePosition, banconeBounds) && DynamicCursor.isPanettiereIntersectsBounds(Panettiere.getPanettiereBounds(), banconeBounds)) {
+            if (DynamicCursor.isMouseOverBounds(mousePosition, banconeBounds)
+                    && DynamicCursor.isPanettiereIntersectsBounds(Panettiere.getPanettiereBounds(), banconeBounds)) {
                 if (toPnlBanconeAction != null) {
                     toPnlBanconeAction.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, null));
                 }

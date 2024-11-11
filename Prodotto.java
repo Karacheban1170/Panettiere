@@ -25,6 +25,7 @@ public class Prodotto extends JComponent implements Runnable, MouseListener, Mou
 
     private static final Color GREEN_COLOR = new Color(0, 255, 0, 200);
     private static final int SECONDI_COTTURA = 10;
+    private int secondiRimasti;
 
     // Prodotto nel panello "Bancone"
     public Prodotto(BufferedImage immagine, String nome, int quantita) {
@@ -43,6 +44,7 @@ public class Prodotto extends JComponent implements Runnable, MouseListener, Mou
     public Prodotto(BufferedImage immagine, String nome) {
         this.nome = nome;
         this.immagine = immagine;
+        secondiRimasti = SECONDI_COTTURA;
         fixedPositionBancone = new Point(0, 0);
         fixedPositionForno1 = new Point(PanificioFrame.getWidthFrame() / 2 - 120,
                 PanificioFrame.getHeightFrame() / 2 + 10);
@@ -188,6 +190,10 @@ public class Prodotto extends JComponent implements Runnable, MouseListener, Mou
             g2d.fillRect(x, y, filledWidth, progressBarHeight);
 
             g2d.setColor(Color.BLACK);
+
+            g2d.setFont(new Font("Arial", Font.BOLD, 15));
+            g2d.drawString(String.valueOf(secondiRimasti) + " S", x + 110, y + 16);
+
             g2d.setStroke(new BasicStroke(3));
             g2d.drawRect(x, y, progressBarWidth, progressBarHeight);
         }
@@ -211,6 +217,7 @@ public class Prodotto extends JComponent implements Runnable, MouseListener, Mou
                     try {
                         Thread.sleep(delay);
                         count--;
+                        secondiRimasti = count / 10;
                         progressBar.setValue(count);
                     } catch (InterruptedException e) {
                         e.getMessage();

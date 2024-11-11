@@ -21,11 +21,10 @@ public class PanificioMonitor {
 
 		System.out.println(nome + " e' entrato al panificio");
 	}
-	
 
 	public synchronized void exitPanificio(String nome) {
 		clientiDentro--;
-		System.out.println(nome +" e' uscito dal panificio \n");
+		System.out.println(nome + " e' uscito dal panificio \n");
 
 		if (panificioLibero()) {
 			System.out.println("Il panificio e' libero\n");
@@ -36,7 +35,7 @@ public class PanificioMonitor {
 	}
 
 	public static boolean isClientiEntrano() {
-        return clientiEntrano;
-    }
+		return clientiEntrano;
+	}
 
 }

@@ -96,7 +96,7 @@ public class DynamicCursor {
 
     // Metodo UpdateCursor per "Forno"
     public static void updateCursor(JPanel panello, Rectangle btnBanconeBounds,
-            ArrayList<Rectangle> ingredientiBounds, Rectangle nuovoProdottoBounds) {
+            ArrayList<Rectangle> ingredientiBounds, Rectangle nuovoProdottoBounds, Rectangle libroRicetteBounds) {
         Point mousePosition = panello.getMousePosition();
         if (mousePosition != null) {
             String area = "";
@@ -108,6 +108,8 @@ public class DynamicCursor {
                 area = "nuovoProdotto";
             } else if (isMouseOverArrayBounds(mousePosition, ingredientiBounds)) {
                 area = "ingredienti";
+            } else if (isMouseOverBounds(mousePosition, libroRicetteBounds)) {
+                area = "libroRicette";
             }
 
             // Imposta il cursore in base all'area determinata
@@ -118,6 +120,9 @@ public class DynamicCursor {
                 case "nuovoProdotto":
                     panello.setCursor(selectCursor);
                     break;
+                case "libroRicette":
+                    panello.setCursor(selectCursor);
+                    break;
                 case "ingredienti":
                     if (!Forno.isProdottoStaCuocendo()) {
                         panello.setCursor(selectCursor);
@@ -125,6 +130,7 @@ public class DynamicCursor {
                         panello.setCursor(transparentSelectCursor);
                     }
                     break;
+                
 
                 default:
                     panello.setCursor(defaultCursor);

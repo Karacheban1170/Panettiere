@@ -24,7 +24,7 @@ public class ProgressBar extends JPanel {
         if (value < minValue) {
             return;
         }
-    
+
         currentValue = value;
         repaint();
     }
