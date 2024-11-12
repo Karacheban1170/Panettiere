@@ -38,7 +38,7 @@ public class Cliente implements Runnable {
 
     private static final Color GREEN_COLOR = new Color(0, 255, 0, 200);
     private final int secondiAttesa;
-    private int secondiRimasti;
+    private int secondiRimanenti;
 
     public Cliente(BufferedImage imgCliente, PanificioMonitor panificioMonitor, String nome,
             ArrayList<Prodotto> prodotti) {
@@ -70,7 +70,7 @@ public class Cliente implements Runnable {
         progressBar = new ProgressBar(0, 100);
         progressBar.setPreferredSize(new Dimension(width / 2, 20));
         progressBar.setProgressColor(GREEN_COLOR);
-        secondiRimasti = secondiAttesa;
+        secondiRimanenti = secondiAttesa;
     }
     
 
@@ -162,7 +162,7 @@ public class Cliente implements Runnable {
                 g2d.setColor(Color.BLACK);
 
                 g2d.setFont(new Font("Arial", Font.BOLD, 15));
-                g2d.drawString(String.valueOf(secondiRimasti) + " S", x + 95, y + 16);
+                g2d.drawString(String.valueOf(secondiRimanenti) + " S", x + 95, y + 16);
                 g2d.setStroke(new BasicStroke(3));
                 g2d.drawRect(x, y, progressBarWidth, progressBarHeight);
             }
@@ -189,7 +189,7 @@ public class Cliente implements Runnable {
                     try {
                         Thread.sleep(delay);
                         count--;
-                        secondiRimasti = count * secondi / 100;
+                        secondiRimanenti = count * secondi / 100;
                         progressBar.setValue(count);
                     } catch (InterruptedException e) {
                         e.getMessage();

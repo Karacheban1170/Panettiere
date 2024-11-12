@@ -217,7 +217,7 @@ public class Prodotto extends JComponent implements Runnable, MouseListener, Mou
                     try {
                         Thread.sleep(delay);
                         count--;
-                        secondiRimasti = count / 10;
+                        secondiRimasti = count * secondi / 100;
                         progressBar.setValue(count);
                     } catch (InterruptedException e) {
                         e.getMessage();
