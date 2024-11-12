@@ -1,6 +1,11 @@
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.Scanner;
+
 import javax.swing.*;
 
 public class Panificio extends JPanel implements Runnable, FocusListener, MouseListener {
@@ -17,10 +22,14 @@ public class Panificio extends JPanel implements Runnable, FocusListener, MouseL
     private final Panettiere panettiere;
     private final BufferedImage bancone;
 
+    private final BufferedImage spunta;
+    private final BufferedImage croce;
+
     private final Rectangle banconeBounds;
     private final Rectangle portaBounds;
 
-    private ActionListener toPnlBanconeAction;
+    private final ActionListener toPnlBanconeAction;
+    private boolean scoreFinaleAperto;
 
     public Panificio(int width, int height, ActionListener toPnlBanconeAction) {
         this.width = width;
@@ -28,9 +37,13 @@ public class Panificio extends JPanel implements Runnable, FocusListener, MouseL
         this.sfondo = ImageLoader.loadImage("img/panificio_sfondo.jpg");
         this.bancone = ImageLoader.loadImage("img/panificio_bancone.png");
 
-        panettiere = new Panettiere(this);
+        this.spunta = ImageLoader.loadImage("img/spunta.png");
+        this.croce = ImageLoader.loadImage("img/croce.png");
 
-        portaBounds = new Rectangle(width - 200, height - 100, 150, 50);
+        panettiere = new Panettiere(this);
+        scoreFinaleAperto = false;
+
+        portaBounds = new Rectangle(width - 155, 180, 75, 230);
         banconeBounds = new Rectangle((width / 2) - 230, (height / 2) + 45, 400, 100);
 
         this.toPnlBanconeAction = toPnlBanconeAction;
@@ -48,7 +61,7 @@ public class Panificio extends JPanel implements Runnable, FocusListener, MouseL
         while (running) {
             try {
                 Thread.sleep(10);
-                DynamicCursor.updateCursor(this, Panettiere.getPanettiereBounds(), banconeBounds);
+                DynamicCursor.updateCursor(this, Panettiere.getPanettiereBounds(), banconeBounds, portaBounds);
                 repaint();
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -78,10 +91,12 @@ public class Panificio extends JPanel implements Runnable, FocusListener, MouseL
         disegnaBancone(g2d);
 
         if (!focussed) {
-            paintIstruzioni(g2d);
+            disegnaIstruzioni(g2d);
         }
 
-        
+        if (scoreFinaleAperto) {
+            disegnaScoreFinale(g2d);
+        }
 
         FadingScene.disegnaFadingRect(g2d);
     }
@@ -104,7 +119,7 @@ public class Panificio extends JPanel implements Runnable, FocusListener, MouseL
         }
     }
 
-    private void paintIstruzioni(Graphics2D g2d) {
+    private void disegnaIstruzioni(Graphics2D g2d) {
         // Imposta il colore e la trasparenza per lo sfondo delle istruzioni
         g2d.setColor(new Color(0, 0, 0, 150)); // Nero semi-trasparente
         g2d.fillRect(0, 0, width, height); // Rettangolo di sfondo
@@ -153,10 +168,73 @@ public class Panificio extends JPanel implements Runnable, FocusListener, MouseL
         }
     }
 
-    private void paintScoreFinale(Graphics2D g2d){
+    private void disegnaScoreFinale(Graphics2D g2d) {
+        // Sfondo semitrasparente
         g2d.setColor(new Color(0, 0, 0, 150));
-        g2d.fillRect(0, 0, width, height); 
+        g2d.fillRect(0, 0, width, height);
 
+        // Impostazioni di posizione per i nomi dei clienti e le icone
+        int xPosLeft = width / 3 - 35; // Colonna sinistra
+        int xPosRight = xPosLeft + 250; // Colonna destra
+        int yPos = 50;
+        int sizeIcon = 50;
+        int maxPerColonna = 5; // Numero massimo di clienti per colonna
+
+        // Leggi il risultato migliore da un file esterno
+        int migliorRisultato = 0;
+        try (Scanner sc = new Scanner(new File("risultato_migliore.txt"))) {
+            if (sc.hasNextInt()) {
+                migliorRisultato = sc.nextInt();
+            }
+        } catch (FileNotFoundException e) {
+            e.getMessage();
+            migliorRisultato = 0;
+        }
+
+        ArrayList<Cliente> clienti = Bancone.getClienti();
+        BufferedImage imgSoddisfatto;
+
+        if (clienti != null) {
+            xPosLeft = width / 3 - 35; // Colonna sinistra
+            xPosRight = xPosLeft + 250; // Colonna destra
+            yPos = 50;
+            for (int i = 0; i < clienti.size(); i++) {
+                // Determina l'icona in base alla soddisfazione del cliente
+                if (clienti.get(i).isSoddisfatto()) {
+                    imgSoddisfatto = spunta;
+                } else {
+                    imgSoddisfatto = croce;
+                }
+
+                // Imposta la colonna e la posizione Y
+                int xPos;
+                if (i < maxPerColonna) {
+                    xPos = xPosLeft;
+                } else {
+                    xPos = xPosRight;
+                }
+                int currentYPos = yPos + (i % maxPerColonna) * 70;
+
+                // Disegna il nome del cliente
+                g2d.setColor(Color.WHITE);
+                g2d.setFont(new Font("Arial", Font.BOLD, 15));
+                g2d.drawString(clienti.get(i).getNome(), xPos, currentYPos + 30);
+
+                // Disegna l'icona
+                g2d.drawImage(imgSoddisfatto, xPos + 100, currentYPos, sizeIcon, sizeIcon, this);
+            }
+        }
+
+        // Mostra il punteggio finale a sinistra
+        g2d.setColor(Color.WHITE);
+        g2d.setFont(new Font("Arial", Font.BOLD, 20));
+
+        g2d.drawString("Risultato Finale: ", xPosLeft, yPos + (maxPerColonna + 1) * 61);
+        g2d.drawString(String.valueOf(Bancone.getScore()), xPosLeft + 70, yPos + (maxPerColonna + 1) * 66);
+
+        // Mostra il miglior risultato a destra
+        g2d.drawString("Risultato Migliore: ", xPosRight, yPos + (maxPerColonna + 1) * 61);
+        g2d.drawString(String.valueOf(migliorRisultato), xPosRight + 70, yPos + (maxPerColonna + 1) * 66);
 
     }
 
@@ -197,10 +275,14 @@ public class Panificio extends JPanel implements Runnable, FocusListener, MouseL
             Point mousePosition = e.getPoint();
             if (DynamicCursor.isMouseOverBounds(mousePosition, banconeBounds)
                     && DynamicCursor.isPanettiereIntersectsBounds(Panettiere.getPanettiereBounds(), banconeBounds)) {
+                Bancone.setScore(0);
                 if (toPnlBanconeAction != null) {
                     toPnlBanconeAction.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, null));
                 }
-            }
+            } else
+                scoreFinaleAperto = DynamicCursor.isMouseOverBounds(mousePosition, portaBounds)
+                        && DynamicCursor.isPanettiereIntersectsBounds(Panettiere.getPanettiereBounds(), portaBounds)
+                        && scoreFinaleAperto == false;
         }
     }
 

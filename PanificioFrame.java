@@ -1,4 +1,7 @@
 import java.awt.CardLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
 import javax.swing.JFrame;
 
 public class PanificioFrame extends JFrame {
@@ -26,27 +29,43 @@ public class PanificioFrame extends JFrame {
     }
 
     private void initPanelli() {
-        pnlPanificio = new Panificio(WIDTH_FRAME, HEIGHT_FRAME, e -> {
-            showPanel("PnlBancone");
-            pnlBancone.initClienti();
-            FadingScene.fadingIn();
-        });
-        pnlBancone = new Bancone(WIDTH_FRAME, HEIGHT_FRAME, e -> {
-            showPanel("PnlPanificio");
-            FadingScene.fadingIn();
-        }, e -> {
-            showPanel("PnlForno");
-            FadingScene.fadingIn();
-        });
-        pnlForno = new Forno(WIDTH_FRAME, HEIGHT_FRAME, e -> {
-            showPanel("PnlBancone");
-            FadingScene.fadingIn();
+        pnlPanificio = new Panificio(WIDTH_FRAME, HEIGHT_FRAME, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                showPanel("PnlBancone");
+                pnlBancone.initClienti();
+                FadingScene.fadingIn();
+            }
         });
 
+        pnlBancone = new Bancone(WIDTH_FRAME, HEIGHT_FRAME, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                showPanel("PnlPanificio");
+                FadingScene.fadingIn();
+            }
+        }, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                showPanel("PnlForno");
+                FadingScene.fadingIn();
+            }
+        });
+
+        pnlForno = new Forno(WIDTH_FRAME, HEIGHT_FRAME, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                showPanel("PnlBancone");
+                FadingScene.fadingIn();
+            }
+        });
+
+        // Avvia i pannelli
         pnlPanificio.start();
         pnlBancone.start();
         pnlForno.start();
 
+        // Aggiungi i pannelli al contenitore
         getContentPane().add(pnlPanificio, "PnlPanificio");
         getContentPane().add(pnlBancone, "PnlBancone");
         getContentPane().add(pnlForno, "PnlForno");

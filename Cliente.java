@@ -34,9 +34,10 @@ public class Cliente implements Runnable {
     private static boolean clienteEntrato;
 
     private final ProgressBar progressBar;
+    private final Random rand = new Random();
 
     private static final Color GREEN_COLOR = new Color(0, 255, 0, 200);
-    private static final int SECONDI_ATTESA = 10;
+    private final int secondiAttesa;
     private int secondiRimasti;
 
     public Cliente(BufferedImage imgCliente, PanificioMonitor panificioMonitor, String nome,
@@ -46,6 +47,8 @@ public class Cliente implements Runnable {
         this.nome = nome;
         this.prodotti = prodotti;
         prodottoDesiderato = scegliProdottoDesiderato();
+
+        secondiAttesa = 10 + rand.nextInt(11); // range(10-20)
 
         // Variabili del Cliente
         width = 200;
@@ -67,14 +70,15 @@ public class Cliente implements Runnable {
         progressBar = new ProgressBar(0, 100);
         progressBar.setPreferredSize(new Dimension(width / 2, 20));
         progressBar.setProgressColor(GREEN_COLOR);
-        secondiRimasti = SECONDI_ATTESA;
+        secondiRimasti = secondiAttesa;
     }
+    
 
     @Override
     public void run() {
         while (running) {
             entraCliente();
-            Thread progressBarThread = createAndStartDecrementThread(SECONDI_ATTESA);
+            Thread progressBarThread = createAndStartDecrementThread(secondiAttesa);
 
             // Una volta entrato, il cliente si ferma e aspetta un momento
             try {
@@ -119,7 +123,6 @@ public class Cliente implements Runnable {
     }
 
     private Prodotto scegliProdottoDesiderato() {
-        Random rand = new Random();
         return prodotti.get(rand.nextInt(prodotti.size())); // Scegli un prodotto casuale
     }
 
@@ -186,7 +189,7 @@ public class Cliente implements Runnable {
                     try {
                         Thread.sleep(delay);
                         count--;
-                        secondiRimasti = count / 10;
+                        secondiRimasti = count * secondi / 100;
                         progressBar.setValue(count);
                     } catch (InterruptedException e) {
                         e.getMessage();

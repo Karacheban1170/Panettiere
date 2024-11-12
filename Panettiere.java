@@ -29,7 +29,7 @@ public class Panettiere implements KeyListener {
         this.centroX = 370;
         this.centroY = 140;
 
-        Panettiere.panettiereBounds = new Rectangle(centroX + 100, centroY, width - 199, height);
+        Panettiere.panettiereBounds = new Rectangle(centroX + 100, centroY, width - 50, height);
     }
 
     private BufferedImage loadImage(String path) {

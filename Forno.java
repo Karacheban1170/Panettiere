@@ -27,8 +27,8 @@ public class Forno extends JPanel implements Runnable, MouseListener {
 
     private Prodotto nuovoProdotto;
     private static Rectangle nuovoProdottoBounds;
-    private Rectangle libroRicetteBounds;
-    private Rectangle paginaLibroBounds;
+    private final Rectangle libroRicetteBounds;
+    private final Rectangle paginaLibroBounds;
 
     private static boolean prodottoStaCuocendo;
 
@@ -37,7 +37,9 @@ public class Forno extends JPanel implements Runnable, MouseListener {
     private final BufferedImage paginaLibro;
     private boolean libroAperto;
 
-    private static final Color GREEN_COLOR = new Color(0, 255, 0, 200);
+    private static final Color WHITE_COLOR = new Color(232, 247,238, 255);
+    private static final Color BROWN_COLOR = new Color(46, 21, 0, 255);
+    
 
     public Forno(int width, int height, ActionListener toPnlBanconeAction) {
         this.width = width;
@@ -45,8 +47,7 @@ public class Forno extends JPanel implements Runnable, MouseListener {
         this.sfondo = ImageLoader.loadImage("img/forno_sfondo.jpg");
         this.btnBancone = ImageLoader.loadImage("img/btn_bancone.png");
         this.libroRicette = ImageLoader.loadImage("img/libro_ricette.png");
-        // this.paginaLibro = ImageLoader.loadImage("img/libro_ricette.png");
-        this.paginaLibro = null;
+        this.paginaLibro = ImageLoader.loadImage("img/pagina_ricette.png");
 
         setLayout(null);
 
@@ -75,7 +76,8 @@ public class Forno extends JPanel implements Runnable, MouseListener {
         while (running) {
             try {
                 Thread.sleep(10);
-                DynamicCursor.updateCursor(this, btnBanconeBounds, ingredientiBounds, nuovoProdottoBounds, libroRicetteBounds);
+                DynamicCursor.updateCursor(this, btnBanconeBounds, ingredientiBounds, nuovoProdottoBounds,
+                        libroRicetteBounds);
                 repaint();
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -119,6 +121,8 @@ public class Forno extends JPanel implements Runnable, MouseListener {
         disegnaLibroRicette(g2d);
 
         if (libroAperto) {
+            g2d.setColor(new Color(0, 0, 0, 150)); // Nero semi-trasparente
+            g2d.fillRect(0, 0, width, height); // Rettangolo di sfondo
             disegnaPaginaLibro(g2d);
         }
 
@@ -231,18 +235,19 @@ public class Forno extends JPanel implements Runnable, MouseListener {
                 g2d.drawImage(prodotti.get(i).getImage(), xPos, yPos, sizeProdotto, sizeProdotto, this);
 
                 // Disegna la quantità accanto al prodotto
-                g2d.setColor(Color.BLACK);
+                g2d.setColor(BROWN_COLOR);
                 g2d.setFont(new Font("Arial", Font.BOLD, 15));
 
                 String quantitaStr = String.valueOf(prodotti.get(i).getQuantita());
+
                 g2d.fillOval(xPos + 33, yPos + 31, 25, 25);
 
-                g2d.setColor(GREEN_COLOR);
+                g2d.setColor(WHITE_COLOR);
 
                 if (prodotti.get(i).getQuantita() > 9) {
                     g2d.drawString(quantitaStr, xPos + 38, yPos + 50);
                 } else {
-                    g2d.drawString(quantitaStr, xPos + 43, yPos + 50);
+                    g2d.drawString(quantitaStr, xPos + 42, yPos + 50);
                 }
 
                 yPos += 70;
@@ -263,8 +268,7 @@ public class Forno extends JPanel implements Runnable, MouseListener {
 
     private void disegnaPaginaLibro(Graphics2D g2d) {
         if (paginaLibro != null) {
-            g2d.drawImage(paginaLibro, PanificioFrame.getWidthFrame() - paginaLibro.getWidth() + 25,
-                    paginaLibro.getHeight() - 175, 125, 125,
+            g2d.drawImage(paginaLibro, width / 4, -13, width / 2 - 20, height - 20,
                     this);
         } else {
             g2d.setColor(Color.BLACK);
@@ -276,11 +280,11 @@ public class Forno extends JPanel implements Runnable, MouseListener {
         int startX = width / 4; // Coordinata iniziale x centrata dinamicamente
         int yPos = 400; // Posizione fissa verticale
 
-        ingredientiFrame.add(ImageLoader.loadImage("img/prodottoFrame.png"));
-        ingredientiFrame.add(ImageLoader.loadImage("img/prodottoFrame.png"));
-        ingredientiFrame.add(ImageLoader.loadImage("img/prodottoFrame.png"));
-        ingredientiFrame.add(ImageLoader.loadImage("img/prodottoFrame.png"));
-        ingredientiFrame.add(ImageLoader.loadImage("img/prodottoFrame.png"));
+        ingredientiFrame.add(ImageLoader.loadImage("img/ingredienteFrame1.png"));
+        ingredientiFrame.add(ImageLoader.loadImage("img/ingredienteFrame2.png"));
+        ingredientiFrame.add(ImageLoader.loadImage("img/ingredienteFrame3.png"));
+        ingredientiFrame.add(ImageLoader.loadImage("img/ingredienteFrame4.png"));
+        ingredientiFrame.add(ImageLoader.loadImage("img/ingredienteFrame5.png"));
 
         // Aggiungi ingredienti con posizioni calcolate dinamicamente
         ingredienti.add(new Prodotto(ImageLoader.loadImage("img/ingrediente1.png"), "acqua"));
@@ -400,14 +404,13 @@ public class Forno extends JPanel implements Runnable, MouseListener {
     public void mouseReleased(MouseEvent e) {
         if (e.getButton() == MouseEvent.BUTTON1) {
             Point mousePosition = e.getPoint();
-            if (DynamicCursor.isMouseOverBounds(mousePosition, btnBanconeBounds)) {
+            if (DynamicCursor.isMouseOverBounds(mousePosition, btnBanconeBounds) && libroAperto == false) {
                 if (toPnlBanconeAction != null) {
                     toPnlBanconeAction.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, null));
                 }
-            } else if (DynamicCursor.isMouseOverBounds(mousePosition, libroRicetteBounds)) {
+            } else if (DynamicCursor.isMouseOverBounds(mousePosition, libroRicetteBounds) && libroAperto == false) {
                 libroAperto = true;
-            }
-            else if(!DynamicCursor.isMouseOverBounds(mousePosition, paginaLibroBounds)){
+            } else if (!DynamicCursor.isMouseOverBounds(mousePosition, paginaLibroBounds)) {
                 libroAperto = false;
             }
 

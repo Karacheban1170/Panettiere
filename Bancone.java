@@ -1,8 +1,13 @@
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.Scanner;
+
 import javax.swing.*;
 
 public class Bancone extends JPanel implements Runnable, MouseListener {
@@ -21,7 +26,7 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
     private final Rectangle btnIndietroBounds;
     private final Rectangle btnFornoBounds;
 
-    private ArrayList<Cliente> clienti;
+    private static ArrayList<Cliente> clienti;
     private final int numClienti;
 
     private static ArrayList<Prodotto> prodotti;
@@ -30,7 +35,11 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
     private final int numProdotti;
     private final int quantitaProdotti;
 
+    private static int score;
+
     private static final Color GREEN_COLOR = new Color(0, 255, 0, 200);
+    private static final Color WHITE_COLOR = new Color(232, 247,238, 255);
+    private static final Color BROWN_COLOR = new Color(46, 21, 0, 255);
 
     private final BufferedImage[] immaginiClienti = {
             ImageLoader.loadImage("img/cliente1.png"),
@@ -57,6 +66,8 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
         numClienti = 10;
         numProdotti = 4;
         quantitaProdotti = 2;
+
+        score = 0;
 
         prodotti = new ArrayList<>(numProdotti);
         prodottiBounds = new ArrayList<>(prodotti.size());
@@ -163,13 +174,13 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
                 prodottiBounds.add(new Rectangle(xPos, yPos, sizeProdotto, sizeProdotto));
 
                 // Disegna la quantità accanto al prodotto
-                g2d.setColor(Color.BLACK);
+                g2d.setColor(BROWN_COLOR);
                 g2d.setFont(new Font("Arial", Font.BOLD, 16));
 
                 String quantitaStr = String.valueOf(prodotti.get(i).getQuantita());
                 g2d.fillOval(xPos + 58, yPos + 49, 31, 31);
 
-                g2d.setColor(GREEN_COLOR);
+                g2d.setColor(WHITE_COLOR);
 
                 if (prodotti.get(i).getQuantita() > 9) {
                     g2d.drawString(quantitaStr, xPos + 65, yPos + 70);
@@ -239,10 +250,12 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
                             // Decrementa la quantità del prodotto
                             prodottoSelezionato.decrementaQuantita();
                             cliente.setSoddisfatto(true);
+                            score += 20;
                             break;
                         } else {
                             prodottoSelezionato.decrementaQuantita();
                             cliente.setSoddisfatto(false);
+                            score += 5;
                             break;
                         }
                     }
@@ -267,6 +280,25 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
             if (DynamicCursor.isMouseOverBounds(mousePosition, btnIndietroBounds)) {
                 if (toPnlPanificioAction != null && PanificioMonitor.isClientiEntrano() == false) {
                     toPnlPanificioAction.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, null));
+
+                    try {
+                        File file = new File("risultato_migliore.txt");
+                        int migliorRisultato = 0;
+                        try (Scanner sc = new Scanner(file)) {
+                            if (sc.hasNextInt()) {
+                                migliorRisultato = sc.nextInt();
+                            }
+                        }
+
+                        if (getScore() > migliorRisultato) {
+                            try (PrintWriter writer = new PrintWriter(file)) {
+                                writer.println(getScore());
+                            }
+                        }
+
+                    } catch (FileNotFoundException exc) {
+                        exc.getMessage();
+                    }
                 }
 
             } else if (DynamicCursor.isMouseOverBounds(mousePosition, btnFornoBounds)) {
@@ -296,7 +328,19 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
         return prodotti;
     }
 
+    public static ArrayList<Cliente> getClienti() {
+        return clienti;
+    }
+
     public static BufferedImage getProdottoFrame() {
         return prodottoFrame;
+    }
+
+    public static void setScore(int score) {
+        Bancone.score = score;
+    }
+
+    public static int getScore() {
+        return score;
     }
 }

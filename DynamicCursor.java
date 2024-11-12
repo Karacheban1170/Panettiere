@@ -34,15 +34,21 @@ public class DynamicCursor {
     }
 
     // Metodo UpdateCursor per "Panificio"
-    public static void updateCursor(JPanel panello, Rectangle panettiereBounds, Rectangle bounds) {
+    public static void updateCursor(JPanel panello, Rectangle panettiereBounds, Rectangle banconeBounds,
+            Rectangle portaBounds) {
         Point mousePosition = panello.getMousePosition();
         if (mousePosition != null) {
-            if (isMouseOverBounds(mousePosition, bounds)) {
-                if (isPanettiereIntersectsBounds(panettiereBounds, bounds)) {
-                    panello.setCursor(selectCursor);
-                } else {
-                    panello.setCursor(transparentSelectCursor);
-                }
+            boolean isOverBancone = isMouseOverBounds(mousePosition, banconeBounds);
+            boolean isOverPorta = isMouseOverBounds(mousePosition, portaBounds);
+
+            boolean isIntersectsBancone = isPanettiereIntersectsBounds(panettiereBounds, banconeBounds);
+            boolean isIntersectsPorta = isPanettiereIntersectsBounds(panettiereBounds, portaBounds);
+
+            if ((isOverBancone && isIntersectsBancone) ||
+                    (isOverPorta && isIntersectsPorta)) {
+                panello.setCursor(selectCursor);
+            } else if (isOverBancone || isOverPorta) {
+                panello.setCursor(transparentSelectCursor);
             } else {
                 panello.setCursor(defaultCursor);
             }
@@ -130,7 +136,6 @@ public class DynamicCursor {
                         panello.setCursor(transparentSelectCursor);
                     }
                     break;
-                
 
                 default:
                     panello.setCursor(defaultCursor);
