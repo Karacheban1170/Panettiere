@@ -13,6 +13,8 @@ public class PanificioFrame extends JFrame {
     private static final int WIDTH_FRAME = 960;
     private static final int HEIGHT_FRAME = 540;
 
+    private final GestioneAudio sottofondo;
+
     public PanificioFrame() {
         super("Panificio");
         setSize(WIDTH_FRAME, HEIGHT_FRAME);
@@ -23,9 +25,13 @@ public class PanificioFrame extends JFrame {
         cardLayout = new CardLayout();
         setLayout(cardLayout);
 
+        sottofondo = new GestioneAudio("audio/sottofondo.wav");
+        sottofondo.setVolume(0.55f);
+
         initPanelli();
 
         showPanel("PnlPanificio");
+        sottofondo.playBackgroundMusic();
     }
 
     private void initPanelli() {

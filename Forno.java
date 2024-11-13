@@ -37,9 +37,13 @@ public class Forno extends JPanel implements Runnable, MouseListener {
     private final BufferedImage paginaLibro;
     private boolean libroAperto;
 
-    private static final Color WHITE_COLOR = new Color(232, 247,238, 255);
+    private static final Color WHITE_COLOR = new Color(232, 247, 238, 255);
     private static final Color BROWN_COLOR = new Color(46, 21, 0, 255);
-    
+
+    private final GestioneAudio libroApre;
+    private final GestioneAudio libroChiude;
+
+    private GestioneAudio prodottoCuoce;
 
     public Forno(int width, int height, ActionListener toPnlBanconeAction) {
         this.width = width;
@@ -66,6 +70,15 @@ public class Forno extends JPanel implements Runnable, MouseListener {
         paginaLibroBounds = new Rectangle(width / 4, 0, width / 2, height);
         btnBanconeBounds = new Rectangle(width - 181, 392, 105, 105);
         this.toPnlBanconeAction = toPnlBanconeAction;
+
+        libroApre = new GestioneAudio("audio/libro_apre.wav");
+        libroApre.setVolume(0.65f);
+
+        libroChiude = new GestioneAudio("audio/libro_chiude.wav");
+        libroChiude.setVolume(0.75f);
+
+        prodottoCuoce = new GestioneAudio("audio/prodotto_cuoce.wav");
+        prodottoCuoce.setVolume(0.65f); 
 
         addMouseListener(this);
         DynamicCursor.setCustomCursors(this);
@@ -357,9 +370,9 @@ public class Forno extends JPanel implements Runnable, MouseListener {
                 nuovoProdotto.getHeight());
 
         Thread nuovoProdottoTh = new Thread(nuovoProdotto);
+        prodottoCuoce.playSound();
         nuovoProdottoTh.start();
         prodottoStaCuocendo = true;
-
     }
 
     private void aggiungiNuovoProdotto(Point mousePosition) {
@@ -410,8 +423,10 @@ public class Forno extends JPanel implements Runnable, MouseListener {
                 }
             } else if (DynamicCursor.isMouseOverBounds(mousePosition, libroRicetteBounds) && libroAperto == false) {
                 libroAperto = true;
-            } else if (!DynamicCursor.isMouseOverBounds(mousePosition, paginaLibroBounds)) {
+                libroApre.playSound();
+            } else if (!DynamicCursor.isMouseOverBounds(mousePosition, paginaLibroBounds) && libroAperto == true) {
                 libroAperto = false;
+                libroChiude.playSound();
             }
 
             aggiungiNuovoProdotto(mousePosition);

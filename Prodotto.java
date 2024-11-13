@@ -27,6 +27,8 @@ public class Prodotto extends JComponent implements Runnable, MouseListener, Mou
     private static final int SECONDI_COTTURA = 10;
     private int secondiRimasti;
 
+    
+
     // Prodotto nel panello "Bancone"
     public Prodotto(BufferedImage immagine, String nome, int quantita) {
         this.immagine = immagine;
@@ -37,6 +39,8 @@ public class Prodotto extends JComponent implements Runnable, MouseListener, Mou
         progressBar = new ProgressBar(0, 100);
         progressBar.setPreferredSize(new Dimension(PanificioFrame.getWidthFrame() / 2, 20));
         progressBar.setProgressColor(GREEN_COLOR);
+
+        
 
     }
 

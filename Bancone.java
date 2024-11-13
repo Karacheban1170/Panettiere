@@ -7,7 +7,6 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.Scanner;
-
 import javax.swing.*;
 
 public class Bancone extends JPanel implements Runnable, MouseListener {
@@ -37,8 +36,7 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
 
     private static int score;
 
-    private static final Color GREEN_COLOR = new Color(0, 255, 0, 200);
-    private static final Color WHITE_COLOR = new Color(232, 247,238, 255);
+    private static final Color WHITE_COLOR = new Color(232, 247, 238, 255);
     private static final Color BROWN_COLOR = new Color(46, 21, 0, 255);
 
     private final BufferedImage[] immaginiClienti = {
@@ -52,6 +50,9 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
 
     private final ActionListener toPnlPanificioAction;
     private final ActionListener toPnlFornoAction;
+
+    private final GestioneAudio clienteSoddisfatto;
+    private final GestioneAudio clienteArrabbiato;
 
     public Bancone(int width, int height, ActionListener toPnlPanificioAction, ActionListener toPnlFornoAction) {
         this.width = width;
@@ -83,6 +84,13 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
 
         this.toPnlPanificioAction = toPnlPanificioAction;
         this.toPnlFornoAction = toPnlFornoAction;
+
+        clienteSoddisfatto = new GestioneAudio("audio/cliente_soddisfatto.wav");
+        clienteSoddisfatto.setVolume(0.55f);
+
+        clienteArrabbiato = new GestioneAudio("audio/cliente_arrabbiato.wav");
+        clienteArrabbiato.setVolume(0.55f);
+
         addMouseListener(this);
 
         DynamicCursor.setCustomCursors(this);
@@ -250,11 +258,13 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
                             // Decrementa la quantità del prodotto
                             prodottoSelezionato.decrementaQuantita();
                             cliente.setSoddisfatto(true);
+                            clienteSoddisfatto.playSound();
                             score += 20;
                             break;
                         } else {
                             prodottoSelezionato.decrementaQuantita();
                             cliente.setSoddisfatto(false);
+                            clienteArrabbiato.playSound();
                             score += 5;
                             break;
                         }

@@ -40,6 +40,8 @@ public class Cliente implements Runnable {
     private final int secondiAttesa;
     private int secondiRimanenti;
 
+    private final GestioneAudio clienteArrivato;
+
     public Cliente(BufferedImage imgCliente, PanificioMonitor panificioMonitor, String nome,
             ArrayList<Prodotto> prodotti) {
         this.panificioMonitor = panificioMonitor;
@@ -66,13 +68,14 @@ public class Cliente implements Runnable {
         nuvola = ImageLoader.loadImage("img/nuvola.png");
 
         // Inizializza la barra di progresso e aggiungila al pannello
-
         progressBar = new ProgressBar(0, 100);
         progressBar.setPreferredSize(new Dimension(width / 2, 20));
         progressBar.setProgressColor(GREEN_COLOR);
         secondiRimanenti = secondiAttesa;
+
+        clienteArrivato = new GestioneAudio("audio/cliente_arrivato.wav");
+        clienteArrivato.setVolume(0.5f);
     }
-    
 
     @Override
     public void run() {
@@ -210,6 +213,7 @@ public class Cliente implements Runnable {
         movimentoSinistra = false;
 
         panificioMonitor.enterPanificio(nome);
+        clienteArrivato.playSound();
         while (clienteX < centroBancone) {
             clienteX += VELOCITA_CLIENTE; // Muovi il cliente a destra
             try {
@@ -233,9 +237,9 @@ public class Cliente implements Runnable {
             }
         }
         if (soddisfatto) {
-            System.out.println(nome + " e' stato soddisfatto: ");
+            System.out.println(nome + " e' stato soddisfatto");
         } else {
-            System.out.println(nome + " non e' stato soddisfatto: ");
+            System.out.println(nome + " non e' stato soddisfatto");
         }
         panificioMonitor.exitPanificio(nome);
         stop();
