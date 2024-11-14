@@ -2,34 +2,6 @@
 	"configurations": [
 		{
 			"type": "java",
-			"name": "CustomProgressBarTest",
-			"request": "launch",
-			"mainClass": "CustomProgressBarTest",
-			"projectName": "Panificio_7fe1fc69"
-		},
-		{
-			"type": "java",
-			"name": "DragExample",
-			"request": "launch",
-			"mainClass": "DragExample",
-			"projectName": "Panificio_7fe1fc69"
-		},
-		{
-			"type": "java",
-			"name": "CustomProgressBarTest",
-			"request": "launch",
-			"mainClass": "CustomProgressBarTest",
-			"projectName": "Panificio_75314d91"
-		},
-		{
-			"type": "java",
-			"name": "Panificio",
-			"request": "launch",
-			"mainClass": "Panificio",
-			"projectName": "Panificio_7fe1fc69"
-		},
-		{
-			"type": "java",
 			"name": "PanificioGioco",
 			"request": "launch",
 			"mainClass": "PanificioGioco",

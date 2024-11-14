@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Scanner;
-
 import javax.swing.*;
 
 public class Panificio extends JPanel implements Runnable, FocusListener, MouseListener {
@@ -31,6 +30,8 @@ public class Panificio extends JPanel implements Runnable, FocusListener, MouseL
     private final ActionListener toPnlBanconeAction;
     private boolean scoreFinaleAperto;
 
+    private final GestioneAudio apparizioneScore;
+
     public Panificio(int width, int height, ActionListener toPnlBanconeAction) {
         this.width = width;
         this.height = height;
@@ -45,6 +46,9 @@ public class Panificio extends JPanel implements Runnable, FocusListener, MouseL
 
         portaBounds = new Rectangle(width - 155, 180, 75, 230);
         banconeBounds = new Rectangle((width / 2) - 230, (height / 2) + 45, 400, 100);
+
+        apparizioneScore = new GestioneAudio("audio/apparizione_score.wav");
+        apparizioneScore.setVolume(0.7f);
 
         this.toPnlBanconeAction = toPnlBanconeAction;
         addKeyListener(panettiere);
@@ -95,6 +99,7 @@ public class Panificio extends JPanel implements Runnable, FocusListener, MouseL
         }
 
         if (scoreFinaleAperto) {
+
             disegnaScoreFinale(g2d);
         }
 
@@ -279,10 +284,18 @@ public class Panificio extends JPanel implements Runnable, FocusListener, MouseL
                 if (toPnlBanconeAction != null) {
                     toPnlBanconeAction.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, null));
                 }
-            } else
-                scoreFinaleAperto = DynamicCursor.isMouseOverBounds(mousePosition, portaBounds)
-                        && DynamicCursor.isPanettiereIntersectsBounds(Panettiere.getPanettiereBounds(), portaBounds)
-                        && scoreFinaleAperto == false;
+            } else if (DynamicCursor.isMouseOverBounds(mousePosition, portaBounds)
+                    && DynamicCursor.isPanettiereIntersectsBounds(Panettiere.getPanettiereBounds(), portaBounds)
+                    && scoreFinaleAperto == false) {
+                scoreFinaleAperto = true;
+                if(Bancone.getClienti() != null){
+                    apparizioneScore.playSound();
+                }
+                
+            } else {
+                scoreFinaleAperto = false;
+            }
+
         }
     }
 
