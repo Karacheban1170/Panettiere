@@ -358,23 +358,6 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
         }
     }
 
-    // Metodi vuoti di MouseListener per gestire altri eventi del mouse.
-    @Override
-    public void mouseClicked(MouseEvent e) {
-    }
-
-    @Override
-    public void mousePressed(MouseEvent e) {
-    }
-
-    @Override
-    public void mouseEntered(MouseEvent e) {
-    }
-
-    @Override
-    public void mouseExited(MouseEvent e) {
-    }
-
     /**
      * Evento del mouse che rileva il rilascio del pulsante e gestisce le azioni di
      * clic.
@@ -464,5 +447,22 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
      */
     public static int getScore() {
         return score;
+    }
+
+    // Metodi vuoti di MouseListener per gestire altri eventi del mouse.
+    @Override
+    public void mouseClicked(MouseEvent e) {
+    }
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent e) {
+    }
+
+    @Override
+    public void mouseExited(MouseEvent e) {
     }
 }

@@ -524,24 +524,7 @@ public class Forno extends JPanel implements Runnable, MouseListener {
         }
     }
 
-    // Metodi vuoti di MouseListener per gestire altri eventi del mouse.
-    @Override
-    public void mousePressed(MouseEvent e) {
-
-    }
-
-    @Override
-    public void mouseClicked(MouseEvent e) {
-
-    }
-
-    @Override
-    public void mouseEntered(MouseEvent e) {
-    }
-
-    @Override
-    public void mouseExited(MouseEvent e) {
-    }
+    
 
     /**
      * Gestisce l'evento di rilascio del tasto del mouse. Se il pulsante sinistro
@@ -603,4 +586,22 @@ public class Forno extends JPanel implements Runnable, MouseListener {
         prodottoStaCuocendo = state;
     }
 
+    // Metodi vuoti di MouseListener per gestire altri eventi del mouse.
+    @Override
+    public void mousePressed(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseClicked(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent e) {
+    }
+
+    @Override
+    public void mouseExited(MouseEvent e) {
+    }
 }
