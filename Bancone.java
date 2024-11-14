@@ -9,6 +9,25 @@ import java.util.Random;
 import java.util.Scanner;
 import javax.swing.*;
 
+/**
+ * La classe Bancone rappresenta il pannello del bancone nel gioco
+ * "Panificio".
+ * Questo pannello consente l'interazione con i clienti e la gestione della
+ * vendita dei prodotti.
+ * Implementa Runnable per aggiornare lo stato e MouseListener
+ * per gestire
+ * le interazioni tramite clic del mouse.
+ * 
+ * 
+ * Il pannello contiene elementi grafici come sfondo, immagini di prodotti,
+ * clienti e bottoni.
+ * Inoltre, gestisce la logica di vendita dei prodotti e il passaggio tra
+ * diverse scene (pannelli)
+ * tramite ActionListener
+ * 
+ * @author Gruppo7
+ */
+
 public class Bancone extends JPanel implements Runnable, MouseListener {
 
     private Thread updateThread;
@@ -54,6 +73,18 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
     private final GestioneAudio clienteSoddisfatto;
     private final GestioneAudio clienteArrabbiato;
 
+    /**
+     * Costruttore della classe Bancone
+     * Inizializza le immagini, il monitor, le variabili di stato, i clienti e i
+     * prodotti.
+     *
+     * @param width                larghezza del pannello
+     * @param height               altezza del pannello
+     * @param toPnlPanificioAction ActionListener per il passaggio al pannello
+     *                             Panificio
+     * @param toPnlFornoAction     ActionListener per il passaggio al pannello Forno
+     */
+
     public Bancone(int width, int height, ActionListener toPnlPanificioAction, ActionListener toPnlFornoAction) {
         this.width = width;
         this.height = height;
@@ -96,6 +127,10 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
         DynamicCursor.setCustomCursors(this);
     }
 
+    /**
+     * Esegue il ciclo di aggiornamento del pannello, aggiornando il cursore
+     * e ridisegnando l'interfaccia.
+     */
     @Override
     public void run() {
         while (running) {
@@ -110,6 +145,9 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
         }
     }
 
+    /**
+     * Avvia il thread di aggiornamento per il pannello, se non è già attivo.
+     */
     public synchronized void start() {
         if (updateThread == null || !updateThread.isAlive()) {
             running = true;
@@ -118,6 +156,9 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
         }
     }
 
+    /**
+     * Ferma il thread di aggiornamento per il pannello.
+     */
     public synchronized void stop() {
         running = false;
         if (updateThread != null) {
@@ -125,6 +166,12 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
         }
     }
 
+    /**
+     * Disegna i componenti grafici del pannello, inclusi sfondo, clienti, prodotti,
+     * bottoni e altri elementi interattivi.
+     *
+     * @param g l'oggetto Graphics per il disegno
+     */
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -147,6 +194,11 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
         FadingScene.disegnaFadingRect(g2d);
     }
 
+    /**
+     * Disegna lo sfondo del pannello.
+     *
+     * @param g2d l'oggetto Graphics2D per il disegno
+     */
     private void disegnaSfondo(Graphics2D g2d) {
         if (sfondo != null) {
             g2d.drawImage(sfondo, 0, 0, width, height, this);
@@ -156,6 +208,11 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
         }
     }
 
+    /**
+     * Disegna il bancone sul pannello.
+     *
+     * @param g2d l'oggetto Graphics2D per il disegno
+     */
     private void disegnaBancone(Graphics2D g2d) {
         if (bancone != null) {
             g2d.drawImage(bancone, 0, 355, bancone.getWidth(), bancone.getHeight(), this);
@@ -165,6 +222,12 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
         }
     }
 
+    /**
+     * Disegna i prodotti sul bancone, compresi la cornice e la quantità
+     * disponibile.
+     *
+     * @param g2d l'oggetto Graphics2D per il disegno
+     */
     private void disegnaProdotti(Graphics2D g2d) {
         int xPos = width / 2 - 195;
         int yPos = 405;
@@ -201,6 +264,11 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
         }
     }
 
+    /**
+     * Disegna il bottone per tornare al pannello Panificio.
+     *
+     * @param g2d l'oggetto Graphics2D per il disegno
+     */
     private void disegnaBtnIndietro(Graphics2D g2d) {
         if (btnIndietro != null) {
             g2d.drawImage(btnIndietro, width - btnIndietro.getWidth() - 40, 20, btnIndietro.getWidth(),
@@ -212,6 +280,11 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
         }
     }
 
+    /**
+     * Disegna il bottone per passare al pannello Forno.
+     *
+     * @param g2d l'oggetto Graphics2D per il disegno
+     */
     private void disegnaBtnForno(Graphics2D g2d) {
         if (btnForno != null) {
             g2d.drawImage(btnForno, btnForno.getWidth() + 270, btnForno.getHeight() - 118, 125, 125,
@@ -222,6 +295,10 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
         }
     }
 
+    /**
+     * Inizializza i clienti e avvia i thread associati per il comportamento di ogni
+     * cliente.
+     */
     public void initClienti() {
         clienti = new ArrayList<>();
         Random rand = new Random();
@@ -242,6 +319,12 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
         }
     }
 
+    /**
+     * Gestisce la logica di vendita del prodotto selezionato in base alla posizione
+     * del mouse.
+     *
+     * @param mousePosition la posizione del clic del mouse
+     */
     private void vendiProdotto(Point mousePosition) {
         for (int i = 0; i < prodottiBounds.size(); i++) {
             if (prodottiBounds.get(i).contains(mousePosition)) {
@@ -275,6 +358,7 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
         }
     }
 
+    // Metodi vuoti di MouseListener per gestire altri eventi del mouse.
     @Override
     public void mouseClicked(MouseEvent e) {
     }
@@ -283,6 +367,20 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
     public void mousePressed(MouseEvent e) {
     }
 
+    @Override
+    public void mouseEntered(MouseEvent e) {
+    }
+
+    @Override
+    public void mouseExited(MouseEvent e) {
+    }
+
+    /**
+     * Evento del mouse che rileva il rilascio del pulsante e gestisce le azioni di
+     * clic.
+     *
+     * @param e l'evento del mouse
+     */
     @Override
     public void mouseReleased(MouseEvent e) {
         if (e.getButton() == MouseEvent.BUTTON1) {
@@ -323,33 +421,47 @@ public class Bancone extends JPanel implements Runnable, MouseListener {
         }
     }
 
-    @Override
-    public void mouseEntered(MouseEvent e) {
-    }
-
-    @Override
-    public void mouseExited(MouseEvent e) {
-    }
-
     /**
-     * @return the prodotti
+     * Restituisce la lista dei prodotti.
+     *
+     * @return ArrayList di prodotti
      */
     public static ArrayList<Prodotto> getProdotti() {
         return prodotti;
     }
 
+    /**
+     * Restituisce la lista dei clienti.
+     *
+     * @return ArrayList di clienti
+     */
     public static ArrayList<Cliente> getClienti() {
         return clienti;
     }
 
+    /**
+     * Restituisce il frame per visualizzare i prodotti.
+     *
+     * @return immagine del frame del prodotto
+     */
     public static BufferedImage getProdottoFrame() {
         return prodottoFrame;
     }
 
+    /**
+     * Imposta il punteggio corrente.
+     *
+     * @param score il punteggio da impostare
+     */
     public static void setScore(int score) {
         Bancone.score = score;
     }
 
+    /**
+     * Restituisce il punteggio corrente.
+     *
+     * @return il punteggio corrente
+     */
     public static int getScore() {
         return score;
     }

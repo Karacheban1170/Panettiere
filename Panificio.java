@@ -7,6 +7,12 @@ import java.util.ArrayList;
 import java.util.Scanner;
 import javax.swing.*;
 
+/**
+ * La classe Panificio rappresenta la schermata principale del gioco, dove il panettiere si muove e interagisce con i clienti,
+ * gestendo il punteggio finale e l'interazione con il bancone e la porta per mostrare il punteggio.
+ * 
+ * @author Gruppo7
+ */
 public class Panificio extends JPanel implements Runnable, FocusListener, MouseListener {
 
     private Thread updateThread;
@@ -32,6 +38,13 @@ public class Panificio extends JPanel implements Runnable, FocusListener, MouseL
 
     private final GestioneAudio apparizioneScore;
 
+    /**
+     * Costruisce il pannello del panificio con tutte le immagini e la configurazione iniziale necessaria per il gioco.
+     * 
+     * @param width La larghezza del pannello.
+     * @param height L'altezza del pannello.
+     * @param toPnlBanconeAction L'azione da eseguire quando si passa al pannello del bancone.
+     */
     public Panificio(int width, int height, ActionListener toPnlBanconeAction) {
         this.width = width;
         this.height = height;
@@ -60,6 +73,9 @@ public class Panificio extends JPanel implements Runnable, FocusListener, MouseL
         FadingScene.fadingIn();
     }
 
+    /**
+     * Il ciclo di aggiornamento del gioco, che esegue il rendering continuo del gioco.
+     */
     @Override
     public void run() {
         while (running) {
@@ -74,6 +90,9 @@ public class Panificio extends JPanel implements Runnable, FocusListener, MouseL
         }
     }
 
+     /**
+     * Avvia il thread di aggiornamento.
+     */
     public synchronized void start() {
         running = true;
 
@@ -81,10 +100,18 @@ public class Panificio extends JPanel implements Runnable, FocusListener, MouseL
         updateThread.start();
     }
 
+    /**
+     * Ferma il thread di aggiornamento.
+     */
     public synchronized void stop() {
         running = false;
     }
 
+    /**
+     * Disegna il pannello del panificio, inclusi sfondo, panettiere, bancone e altre informazioni come istruzioni e punteggio finale.
+     * 
+     * @param g L'oggetto Graphics utilizzato per il disegno.
+     */
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -106,6 +133,11 @@ public class Panificio extends JPanel implements Runnable, FocusListener, MouseL
         FadingScene.disegnaFadingRect(g2d);
     }
 
+    /**
+     * Disegna lo sfondo del panificio.
+     * 
+     * @param g2d L'oggetto Graphics2D utilizzato per il disegno.
+     */
     private void disegnaSfondo(Graphics2D g2d) {
         if (sfondo != null) {
             g2d.drawImage(sfondo, 0, 0, width, height, this);
@@ -115,6 +147,11 @@ public class Panificio extends JPanel implements Runnable, FocusListener, MouseL
         }
     }
 
+    /**
+     * Disegna il bancone del panificio.
+     * 
+     * @param g2d L'oggetto Graphics2D utilizzato per il disegno.
+     */
     private void disegnaBancone(Graphics2D g2d) {
         if (bancone != null) {
             g2d.drawImage(bancone, 0, 0, width, height, this);
@@ -124,6 +161,11 @@ public class Panificio extends JPanel implements Runnable, FocusListener, MouseL
         }
     }
 
+    /**
+     * Disegna le istruzioni per il giocatore, indicando i tasti da usare e come interagire con il gioco.
+     * 
+     * @param g2d L'oggetto Graphics2D utilizzato per il disegno.
+     */
     private void disegnaIstruzioni(Graphics2D g2d) {
         // Imposta il colore e la trasparenza per lo sfondo delle istruzioni
         g2d.setColor(new Color(0, 0, 0, 150)); // Nero semi-trasparente
@@ -173,6 +215,11 @@ public class Panificio extends JPanel implements Runnable, FocusListener, MouseL
         }
     }
 
+    /**
+     * Disegna il punteggio finale quando il gioco è finito.
+     * 
+     * @param g2d L'oggetto Graphics2D utilizzato per il disegno.
+     */
     private void disegnaScoreFinale(Graphics2D g2d) {
         // Sfondo semitrasparente
         g2d.setColor(new Color(0, 0, 0, 150));
@@ -243,36 +290,43 @@ public class Panificio extends JPanel implements Runnable, FocusListener, MouseL
 
     }
 
+    /**
+     * Metodo invocato quando il componente acquisisce il focus. Imposta la variabile `focussed` su `true`
+     * e richiama `repaint()` per aggiornare la visualizzazione del componente.
+     * 
+     * @param e l'evento di focus guadagnato
+     */
     @Override
     public void focusGained(FocusEvent e) {
         focussed = true;
         repaint();
     }
 
+    /**
+     * Metodo invocato quando il componente perde il focus. Imposta la variabile `focussed` su `false`
+     * e richiama `repaint()` per aggiornare la visualizzazione del componente.
+     * 
+     * @param e l'evento di focus perso
+     */
     @Override
     public void focusLost(FocusEvent e) {
         focussed = false;
         repaint();
     }
 
-    @Override
-    public void mousePressed(MouseEvent e) {
-
-    }
-
+    /**
+     * Metodo invocato quando si clicca con il mouse. Imposta la variabile `clickAllowed` su `true`
+     * e richiede il focus per il componente.
+     * 
+     * @param e l'evento di clic del mouse
+     */
     @Override
     public void mouseClicked(MouseEvent e) {
         clickAllowed = true;
         requestFocusInWindow();
     }
 
-    @Override
-    public void mouseEntered(MouseEvent e) {
-    }
-
-    @Override
-    public void mouseExited(MouseEvent e) {
-    }
+    
 
     @Override
     public void mouseReleased(MouseEvent e) {
@@ -297,6 +351,20 @@ public class Panificio extends JPanel implements Runnable, FocusListener, MouseL
             }
 
         }
+    }
+
+    // Metodi vuoti di MouseListener per gestire altri eventi del mouse.
+    @Override
+    public void mousePressed(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent e) {
+    }
+
+    @Override
+    public void mouseExited(MouseEvent e) {
     }
 
 }

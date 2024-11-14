@@ -2,10 +2,16 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import javax.imageio.ImageIO;
 
+/**
+ * La classe Panettiere gestisce il movimento e la rappresentazione visiva del personaggio panettiere all'interno
+ * del gioco. Permette di spostarsi a sinistra e a destra tramite i tasti direzionali o le lettere 'A' e 'D', 
+ * e visualizza l'immagine del panettiere in una posizione specificata.
+ * 
+ * Il panettiere può essere rappresentato sia nel suo stato normale che riflesso orizzontalmente quando si muove verso sinistra.
+ * 
+ * @author Gruppo7
+ */
 public class Panettiere implements KeyListener {
     private int centroX;
     private final int centroY;
@@ -19,8 +25,13 @@ public class Panettiere implements KeyListener {
 
     private static Rectangle panettiereBounds;
 
+    /**
+     * Costruttore che inizializza il panettiere con le sue dimensioni e posizione iniziale.
+     * 
+     * @param pnlPanificio Il pannello del panificio in cui il panettiere si muove.
+     */
     public Panettiere(Panificio pnlPanificio) {
-        this.imgPanettiere = loadImage("img/panettiere.png");
+        this.imgPanettiere = ImageLoader.loadImage("img/panettiere.png");
         this.pnlPanificio = pnlPanificio;
 
         this.width = 200;
@@ -32,15 +43,12 @@ public class Panettiere implements KeyListener {
         Panettiere.panettiereBounds = new Rectangle(centroX + 100, centroY, width - 50, height);
     }
 
-    private BufferedImage loadImage(String path) {
-        try {
-            return ImageIO.read(new File(path));
-        } catch (IOException e) {
-            System.out.println(e.getMessage());
-            return null;
-        }
-    }
-
+    /**
+     * Disegna il panettiere nel pannello, considerando la sua posizione e direzione di movimento.
+     * Se il panettiere si sta muovendo a sinistra, l'immagine viene riflessa orizzontalmente.
+     * 
+     * @param g2d L'oggetto Graphics2D utilizzato per disegnare il panettiere.
+     */
     public void disegnaPanettiere(Graphics2D g2d) {
         if (imgPanettiere != null) {
             Panettiere.panettiereBounds = new Rectangle(centroX + 100, centroY, 1, height);
@@ -60,6 +68,12 @@ public class Panettiere implements KeyListener {
         }
     }
 
+    /**
+     * Gestisce la pressione dei tasti. Il panettiere si muove a sinistra con il tasto "LEFT" o "A" 
+     * e a destra con il tasto "RIGHT" o "D".
+     * 
+     * @param e L'evento di pressione del tasto.
+     */
     @Override
     public void keyPressed(KeyEvent e) {
         int key = e.getKeyCode();
@@ -76,6 +90,7 @@ public class Panettiere implements KeyListener {
         }
     }
 
+    // Metodi vuoti di KeyListener per gestire altri eventi del mouse.
     @Override
     public void keyReleased(KeyEvent e) {
     }
@@ -85,35 +100,45 @@ public class Panettiere implements KeyListener {
     }
 
     /**
-     * @return the centroX
+     * Restituisce la posizione X del centro del panettiere.
+     * 
+     * @return La coordinata X del centro del panettiere.
      */
     public int getCentroX() {
         return centroX;
     }
 
     /**
-     * @return the centroY
+     * Restituisce la posizione Y del centro del panettiere.
+     * 
+     * @return La coordinata Y del centro del panettiere.
      */
     public int getCentroY() {
         return centroY;
     }
 
     /**
-     * @return the width
+     * Restituisce la larghezza dell'immagine del panettiere.
+     * 
+     * @return La larghezza dell'immagine del panettiere.
      */
     public int getWidth() {
         return width;
     }
 
-    /**
-     * @return the height
+     /**
+     * Restituisce l'altezza dell'immagine del panettiere.
+     * 
+     * @return L'altezza dell'immagine del panettiere.
      */
     public int getHeight() {
         return height;
     }
 
     /**
-     * @return the panettiereBounds
+     * Restituisce i confini del panettiere, utilizzati per il controllo delle collisioni.
+     * 
+     * @return Un Rectangle che rappresenta i confini del panettiere.
      */
     public static Rectangle getPanettiereBounds() {
         return panettiereBounds;

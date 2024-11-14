@@ -4,6 +4,15 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JFrame;
 
+/**
+ * Classe principale che rappresenta la finestra principale del gioco "Panificio".
+ * Gestisce la visualizzazione dei pannelli tramite un layout a schede (CardLayout),
+ * e la gestione della musica di sottofondo. I pannelli rappresentano diverse
+ * scene del gioco (Panificio, Bancone, Forno) e sono gestiti dinamicamente tramite 
+ * l'uso di ActionListener e il cambio di scena.
+ * 
+ * @author Gruppo7
+ */
 public class PanificioFrame extends JFrame {
     private Panificio pnlPanificio;
     private Bancone pnlBancone;
@@ -15,6 +24,10 @@ public class PanificioFrame extends JFrame {
 
     private final GestioneAudio sottofondo;
 
+    /**
+     * Costruttore della classe. Inizializza la finestra del gioco, il layout a schede,
+     * la musica di sottofondo e i pannelli di gioco.
+     */
     public PanificioFrame() {
         super("Panificio");
         setSize(WIDTH_FRAME, HEIGHT_FRAME);
@@ -34,6 +47,10 @@ public class PanificioFrame extends JFrame {
         sottofondo.playBackgroundMusic();
     }
 
+    /**
+     * Inizializza i pannelli del gioco (Panificio, Bancone, Forno) e imposta le azioni
+     * da eseguire quando l'utente interagisce con i pannelli (passare da un pannello all'altro).
+     */
     private void initPanelli() {
         pnlPanificio = new Panificio(WIDTH_FRAME, HEIGHT_FRAME, new ActionListener() {
             @Override
@@ -77,6 +94,11 @@ public class PanificioFrame extends JFrame {
         getContentPane().add(pnlForno, "PnlForno");
     }
 
+    /**
+     * Mostra il pannello specificato dal nome all'interno della finestra.
+     * 
+     * @param panelName Il nome del pannello da visualizzare.
+     */
     private void showPanel(String panelName) {
         cardLayout.show(getContentPane(), panelName);
         if ("PnlPanificio".equals(panelName)) {
@@ -84,10 +106,20 @@ public class PanificioFrame extends JFrame {
         }
     }
 
+    /**
+     * Restituisce la larghezza della finestra.
+     * 
+     * @return La larghezza della finestra.
+     */
     public static int getWidthFrame() {
         return WIDTH_FRAME;
     }
 
+    /**
+     * Restituisce l'altezza della finestra.
+     * 
+     * @return L'altezza della finestra.
+     */
     public static int getHeightFrame() {
         return HEIGHT_FRAME;
     }

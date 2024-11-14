@@ -7,6 +7,23 @@ import java.util.Map;
 import java.util.Set;
 import javax.swing.*;
 
+/**
+ * La classe Forno rappresenta la scena del forno nel gioco del
+ * panificio. Gestisce il rendering degli ingredienti e la visualizzazione dei
+ * prodotti che cuociono, nonché la gestione delle ricette che sono utilizzate
+ * nel processo di cottura. Si occupa anche dell'interazione con i componenti
+ * della GUI, come il libro delle ricette e il bancone, permettendo all'utente
+ * di interagire con questi oggetti.
+ * 
+ * La classe implementa l'interfaccia Runnable, consentendo l'esecuzione
+ * dell'aggiornamento continuo della scena in un thread separato per garantire
+ * un'
+ * esperienza di gioco fluida e reattiva. Inoltre, gestisce gli eventi del mouse
+ * per interagire con vari elementi della scena, come la selezione di prodotti
+ * e il controllo delle azioni degli utenti.
+ * 
+ * @author Gruppo7
+ */
 public class Forno extends JPanel implements Runnable, MouseListener {
 
     private Thread updateThread;
@@ -43,8 +60,16 @@ public class Forno extends JPanel implements Runnable, MouseListener {
     private final GestioneAudio libroApre;
     private final GestioneAudio libroChiude;
 
-    private GestioneAudio prodottoCuoce;
+    private final GestioneAudio prodottoCuoce;
 
+    /**
+     * Costruisce la scena del forno con le impostazioni iniziali.
+     *
+     * @param width              La larghezza della finestra del forno.
+     * @param height             La altezza della finestra del forno.
+     * @param toPnlBanconeAction L'azione da eseguire quando si interagisce con il
+     *                           pulsante del bancone.
+     */
     public Forno(int width, int height, ActionListener toPnlBanconeAction) {
         this.width = width;
         this.height = height;
@@ -78,12 +103,15 @@ public class Forno extends JPanel implements Runnable, MouseListener {
         libroChiude.setVolume(0.75f);
 
         prodottoCuoce = new GestioneAudio("audio/prodotto_cuoce.wav");
-        prodottoCuoce.setVolume(0.65f); 
+        prodottoCuoce.setVolume(0.65f);
 
         addMouseListener(this);
         DynamicCursor.setCustomCursors(this);
     }
 
+    /**
+     * Il ciclo di aggiornamento del gioco, che esegue il rendering continuo del gioco.
+     */
     @Override
     public void run() {
         while (running) {
@@ -99,6 +127,9 @@ public class Forno extends JPanel implements Runnable, MouseListener {
         }
     }
 
+    /**
+     * Avvia il thread di aggiornamento continuo per la scena del forno.
+     */
     public synchronized void start() {
         running = true;
 
@@ -106,10 +137,19 @@ public class Forno extends JPanel implements Runnable, MouseListener {
         updateThread.start();
     }
 
+    /**
+     * Ferma l'esecuzione della scena del forno.
+     */
     public synchronized void stop() {
         running = false;
     }
 
+    /**
+     * Esegue il rendering della scena del forno.
+     * Viene chiamato ogni volta che la finestra deve essere ridisegnata.
+     *
+     * @param g L'oggetto Graphics utilizzato per il rendering.
+     */
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -142,6 +182,12 @@ public class Forno extends JPanel implements Runnable, MouseListener {
         FadingScene.disegnaFadingRect(g2d);
     }
 
+    /**
+     * Disegna lo sfondo del forno, utilizzando l'immagine specificata.
+     * Se l'immagine non è disponibile, viene utilizzato un colore di fallback.
+     *
+     * @param g2d Il contesto grafico per disegnare lo sfondo.
+     */
     private void disegnaSfondo(Graphics2D g2d) {
         if (sfondo != null) {
             g2d.drawImage(sfondo, 0, 0, width, height, this);
@@ -151,6 +197,13 @@ public class Forno extends JPanel implements Runnable, MouseListener {
         }
     }
 
+    /**
+     * Disegna le cornici dei forni, indicando le posizioni per i prodotti in
+     * cottura.
+     * Include due forni separati e un forno centrale.
+     *
+     * @param g2d Il contesto grafico utilizzato per disegnare le cornici del forno.
+     */
     private void disegnaFornoFrame(Graphics2D g2d) {
 
         Graphics2D g2dTrans = (Graphics2D) g2d.create();
@@ -175,6 +228,12 @@ public class Forno extends JPanel implements Runnable, MouseListener {
         g2dTrans.fill(centraleFrame);
     }
 
+    /**
+     * Disegna la lista di ingredienti utilizzati nel forno, con il loro rispettivo
+     * frame.
+     *
+     * @param g2d Il contesto grafico utilizzato per disegnare gli ingredienti.
+     */
     private void disegnaIngredientiFrame(Graphics2D g2d) {
         int xPos = width / 4;
         int yPos = 400;
@@ -189,6 +248,13 @@ public class Forno extends JPanel implements Runnable, MouseListener {
         }
     }
 
+    /**
+     * Disegna gli ingredienti effettivi, verificando la loro posizione e
+     * dimensione.
+     * Ogni ingrediente è disegnato con l'immagine e le dimensioni specifiche.
+     *
+     * @param g2d Il contesto grafico utilizzato per disegnare gli ingredienti.
+     */
     private void disegnaIngredienti(Graphics2D g2d) {
         for (int i = 0; i < ingredienti.size(); i++) {
             Prodotto ingrediente = ingredienti.get(i);
@@ -221,6 +287,12 @@ public class Forno extends JPanel implements Runnable, MouseListener {
 
     }
 
+    /**
+     * Disegna il bottone per passare al pannello del bancone.
+     * Questo bottone consente all'utente di navigare tra le scene del gioco.
+     *
+     * @param g2d Il contesto grafico utilizzato per disegnare il bottone.
+     */
     private void disegnaBtnBancone(Graphics2D g2d) {
         if (btnBancone != null) {
             g2d.drawImage(btnBancone, btnBancone.getWidth() + 270, btnBancone.getHeight() - 118, 125, 125,
@@ -231,6 +303,13 @@ public class Forno extends JPanel implements Runnable, MouseListener {
         }
     }
 
+    /**
+     * Disegna i prodotti disponibili nel forno, inclusi il loro frame e la
+     * quantità.
+     *
+     * @param g2d Il contesto grafico utilizzato per disegnare i prodotti
+     *            disponibili.
+     */
     private void disegnaProdottiDisponibili(Graphics2D g2d) {
         int xPos = 25;
         int yPos = 30;
@@ -268,6 +347,12 @@ public class Forno extends JPanel implements Runnable, MouseListener {
         }
     }
 
+    /**
+     * Disegna l'immagine del libro delle ricette sul pannello.
+     * Se il libro delle ricette è nullo, viene disegnato un rettangolo nero.
+     *
+     * @param g2d Il contesto grafico per disegnare l'immagine.
+     */
     private void disegnaLibroRicette(Graphics2D g2d) {
         if (libroRicette != null) {
             g2d.drawImage(libroRicette, PanificioFrame.getWidthFrame() - libroRicette.getWidth() + 25,
@@ -279,6 +364,12 @@ public class Forno extends JPanel implements Runnable, MouseListener {
         }
     }
 
+    /**
+     * Disegna l'immagine della pagina del libro delle ricette.
+     * Se la pagina è nulla, viene disegnato un rettangolo nero.
+     *
+     * @param g2d Il contesto grafico per disegnare l'immagine della pagina.
+     */
     private void disegnaPaginaLibro(Graphics2D g2d) {
         if (paginaLibro != null) {
             g2d.drawImage(paginaLibro, width / 4, -13, width / 2 - 20, height - 20,
@@ -289,6 +380,10 @@ public class Forno extends JPanel implements Runnable, MouseListener {
         }
     }
 
+    /**
+     * Aggiunge gli ingredienti all'interfaccia utente e li posiziona dinamicamente.
+     * Ogni ingrediente viene associato a un'immagine e alla sua posizione iniziale.
+     */
     private void aggiungiIngredienti() {
         int startX = width / 4; // Coordinata iniziale x centrata dinamicamente
         int yPos = 400; // Posizione fissa verticale
@@ -322,6 +417,10 @@ public class Forno extends JPanel implements Runnable, MouseListener {
         }
     }
 
+    /**
+     * Carica le ricette creando coppie di ingredienti associati a un prodotto
+     * finale.
+     */
     private void caricaRicette() {
         // Crea le ricette usando coppie di ingredienti
         ricette.put(Set.of("farina", "latte"), new Prodotto(ImageLoader.loadImage("img/prodotto1.png"), "ciambella"));
@@ -330,6 +429,13 @@ public class Forno extends JPanel implements Runnable, MouseListener {
         ricette.put(Set.of("farina", "acqua"), new Prodotto(ImageLoader.loadImage("img/prodotto4.png"), "pane"));
     }
 
+    /**
+     * Recupera il nome dell'ingrediente situato in una determinata posizione del
+     * forno.
+     *
+     * @param position La posizione dell'ingrediente nel forno.
+     * @return Il nome dell'ingrediente se presente, altrimenti null.
+     */
     private String getProdottoInForno(Point position) {
         for (Prodotto ingrediente : ingredienti) {
             if (ingrediente.getLocation().equals(position)) {
@@ -339,6 +445,11 @@ public class Forno extends JPanel implements Runnable, MouseListener {
         return null;
     }
 
+    /**
+     * Cucina il prodotto combinando due ingredienti e creando un nuovo prodotto.
+     * Se i due ingredienti corrispondono a una ricetta, il prodotto finale viene
+     * creato.
+     */
     private void cuociProdotto() {
         // Recupera ingredienti nelle posizioni del forno
         String ingr1 = getProdottoInForno(Prodotto.getFixedPositionForno1());
@@ -352,6 +463,17 @@ public class Forno extends JPanel implements Runnable, MouseListener {
         }
     }
 
+    /**
+     * Crea un nuovo prodotto utilizzando due ingredienti e aggiunge il prodotto al
+     * gioco.
+     * Il nuovo prodotto non viene aggiunto alla lista degli ingredienti, ma viene
+     * posizionato visivamente.
+     *
+     * @param ingr1    Il nome del primo ingrediente.
+     * @param ingr2    Il nome del secondo ingrediente.
+     * @param immagine L'immagine del nuovo prodotto.
+     * @param nome     Il nome del nuovo prodotto.
+     */
     private void creaNuovoProdotto(String ingr1, String ingr2, BufferedImage immagine, String nome) {
         for (Prodotto ingrediente : ingredienti) {
             if (ingrediente.getNome().equals(ingr1) || ingrediente.getNome().equals(ingr2)) {
@@ -375,6 +497,13 @@ public class Forno extends JPanel implements Runnable, MouseListener {
         prodottoStaCuocendo = true;
     }
 
+    /**
+     * Aggiunge un nuovo prodotto quando il clic del mouse avviene su un'area
+     * definita.
+     * Incrementa la quantità del prodotto se cliccato sopra, altrimenti lo rimuove.
+     *
+     * @param mousePosition La posizione del clic del mouse.
+     */
     private void aggiungiNuovoProdotto(Point mousePosition) {
         // Verifica se il clic è all'interno dell'area del nuovo prodotto
         if (nuovoProdotto != null && DynamicCursor.isMouseOverBounds(mousePosition, nuovoProdottoBounds)) {
@@ -395,6 +524,7 @@ public class Forno extends JPanel implements Runnable, MouseListener {
         }
     }
 
+    // Metodi vuoti di MouseListener per gestire altri eventi del mouse.
     @Override
     public void mousePressed(MouseEvent e) {
 
@@ -413,6 +543,18 @@ public class Forno extends JPanel implements Runnable, MouseListener {
     public void mouseExited(MouseEvent e) {
     }
 
+    /**
+     * Gestisce l'evento di rilascio del tasto del mouse. Se il pulsante sinistro
+     * viene rilasciato, verifica la posizione
+     * del cursore e prende delle azioni in base a quali aree sono state
+     * selezionate. Può aprire il libro delle ricette,
+     * chiudere il libro delle ricette, oppure eseguire una transizione verso il
+     * pannello del bancone. Inoltre, gestisce
+     * l'aggiunta di un nuovo prodotto, se il clic avviene all'interno dell'area del
+     * prodotto.
+     * 
+     * @param e L'evento di rilascio del mouse.
+     */
     @Override
     public void mouseReleased(MouseEvent e) {
         if (e.getButton() == MouseEvent.BUTTON1) {
@@ -433,14 +575,30 @@ public class Forno extends JPanel implements Runnable, MouseListener {
         }
     }
 
+    /**
+     * Restituisce il rettangolo che definisce l'area del nuovo prodotto.
+     * 
+     * @return Il rettangolo che rappresenta l'area del nuovo prodotto.
+     */
     public static Rectangle getNuovoProdottoBounds() {
         return nuovoProdottoBounds;
     }
 
+    /**
+     * Verifica se un prodotto sta cuocendo.
+     * 
+     * @return True se il prodotto sta cuocendo, false altrimenti.
+     */
     public static boolean isProdottoStaCuocendo() {
         return prodottoStaCuocendo;
     }
 
+    /**
+     * Imposta lo stato di cottura del prodotto.
+     * 
+     * @param state Lo stato da impostare: true se il prodotto sta cuocendo, false
+     *              altrimenti.
+     */
     public static void setProdottoStaCuocendo(boolean state) {
         prodottoStaCuocendo = state;
     }

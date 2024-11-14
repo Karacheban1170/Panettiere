@@ -3,6 +3,23 @@ import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import javax.swing.JComponent;
 
+/**
+ * La classe Prodotto rappresenta un prodotto o ingrediente nel panificio,
+ * gestendo il movimento
+ * tra il bancone e il forno, l'interazione tramite il mouse, e il monitoraggio
+ * della cottura attraverso una barra di progresso.
+ * La classe implementa Runnable, MouseListener, e MouseMotionListener per
+ * gestire il comportamento del prodotto,
+ * come il suo movimento, il monitoraggio della cottura e la gestione del clic e
+ * del trascinamento del mouse.
+ * 
+ * Ogni prodotto ha una quantità e una posizione iniziale, e può essere spostato
+ * tra il bancone e i forni tramite il mouse.
+ * La cottura del prodotto è monitorata da una barra di progresso che si
+ * decrementa nel tempo.
+ *
+ * @author Gruppo7
+ */
 public class Prodotto extends JComponent implements Runnable, MouseListener, MouseMotionListener {
     private final BufferedImage immagine;
     private int quantita;
@@ -27,9 +44,13 @@ public class Prodotto extends JComponent implements Runnable, MouseListener, Mou
     private static final int SECONDI_COTTURA = 10;
     private int secondiRimasti;
 
-    
-
-    // Prodotto nel panello "Bancone"
+    /**
+     * Costruttore per un prodotto nel pannello "Bancone" con una quantità.
+     *
+     * @param immagine l'immagine del prodotto
+     * @param nome     il nome del prodotto
+     * @param quantita la quantità del prodotto
+     */
     public Prodotto(BufferedImage immagine, String nome, int quantita) {
         this.immagine = immagine;
         this.nome = nome;
@@ -40,11 +61,14 @@ public class Prodotto extends JComponent implements Runnable, MouseListener, Mou
         progressBar.setPreferredSize(new Dimension(PanificioFrame.getWidthFrame() / 2, 20));
         progressBar.setProgressColor(GREEN_COLOR);
 
-        
-
     }
 
-    // Ingrediente nel panello "Forno"
+    /**
+     * Costruttore per un ingrediente nel pannello "Forno".
+     *
+     * @param immagine l'immagine dell'ingrediente
+     * @param nome     il nome dell'ingrediente
+     */
     public Prodotto(BufferedImage immagine, String nome) {
         this.nome = nome;
         this.immagine = immagine;
@@ -63,6 +87,10 @@ public class Prodotto extends JComponent implements Runnable, MouseListener, Mou
         setLocation(fixedPositionBancone); // Posizione iniziale
     }
 
+    /**
+     * Avvia il thread del prodotto, che inizia a monitorare la cottura e il
+     * movimento.
+     */
     @Override
     public void run() {
         while (running) {
@@ -81,6 +109,9 @@ public class Prodotto extends JComponent implements Runnable, MouseListener, Mou
         }
     }
 
+    /**
+     * Avvia il thread del prodotto se non è già in esecuzione.
+     */
     public synchronized void start() {
         if (prodottoThread == null || !prodottoThread.isAlive()) {
             prodottoThread = new Thread(this);
@@ -88,6 +119,9 @@ public class Prodotto extends JComponent implements Runnable, MouseListener, Mou
         }
     }
 
+    /**
+     * Ferma il thread del prodotto.
+     */
     public synchronized void stop() {
         running = false;
         if (prodottoThread != null) {
@@ -95,11 +129,24 @@ public class Prodotto extends JComponent implements Runnable, MouseListener, Mou
         }
     }
 
+    /**
+     * Metodo che viene invocato quando si preme il tasto del mouse.
+     * Salva la posizione iniziale del clic per poter tracciare il movimento del mouse durante il trascinamento.
+     * 
+     * @param e L'evento del mouse che contiene informazioni sulla posizione del clic.
+     */
     @Override
     public void mousePressed(MouseEvent e) {
         initialClick = e.getPoint();
     }
 
+    /**
+     * Metodo che viene invocato quando si rilascia il tasto del mouse.
+     * Calcola la distanza tra la posizione corrente dell'oggetto e tre posizioni fisse (bancone, forno 1 e forno 2).
+     * L'oggetto si sposterà verso la posizione fissa più vicina tra bancone, forno 1 e forno 2.
+     * 
+     * @param e L'evento del mouse che contiene informazioni sulla posizione del rilascio del clic.
+     */
     @Override
     public void mouseReleased(MouseEvent e) {
         double distanceToBancone = calculateDistance(getLocation(), fixedPositionBancone);
@@ -118,6 +165,14 @@ public class Prodotto extends JComponent implements Runnable, MouseListener, Mou
         yMoved = 0;
     }
 
+    /**
+     * Metodo che viene invocato quando il mouse viene trascinato.
+     * Calcola il movimento del mouse e aggiorna la posizione dell'oggetto in base alla differenza tra la posizione iniziale
+     * del clic e la posizione attuale del mouse.
+     * L'oggetto si sposta solo se non c'è un prodotto in cottura.
+     * 
+     * @param e L'evento del mouse che contiene informazioni sulla posizione del mouse durante il trascinamento.
+     */
     @Override
     public void mouseDragged(MouseEvent e) {
         if (!Forno.isProdottoStaCuocendo()) {
@@ -133,54 +188,110 @@ public class Prodotto extends JComponent implements Runnable, MouseListener, Mou
         }
     }
 
+    /**
+     * Calcola la distanza euclidea tra due punti.
+     * 
+     * @param p1 Il primo punto, rappresentato come un oggetto Point.
+     * @param p2 Il secondo punto, rappresentato come un oggetto Point.
+     * @return La distanza euclidea tra i due punti.
+     */
     private double calculateDistance(Point p1, Point p2) {
         int deltaX = p1.x - p2.x;
         int deltaY = p1.y - p2.y;
         return Math.sqrt(deltaX * deltaX + deltaY * deltaY);
     }
 
+    /**
+     * Imposta la posizione fissa del bancone per il prodotto.
+     *
+     * @param fixedPositionBancone la nuova posizione fissa del bancone
+     */
     public void setFixedPositionBancone(Point fixedPositionBancone) {
         this.fixedPositionBancone = fixedPositionBancone;
     }
 
+    /**
+     * Imposta la posizione iniziale del prodotto sul bancone.
+     */
     public void setPosizioneIniziale() {
         setLocation(fixedPositionBancone);
     }
 
+    /**
+     * Restituisce la posizione fissa del forno 1.
+     *
+     * @return la posizione fissa del forno 1
+     */
     public static Point getFixedPositionForno1() {
         return fixedPositionForno1;
     }
 
+    /**
+     * Restituisce la posizione fissa del forno 2.
+     *
+     * @return la posizione fissa del forno 2
+     */
     public static Point getFixedPositionForno2() {
         return fixedPositionForno2;
     }
 
+    /**
+     * Restituisce la posizione centrale del nuovo prodotto.
+     *
+     * @return la posizione centrale del nuovo prodotto
+     */
     public static Point getPositionCentraleNuovoProdotto() {
         return positionCentraleNuovoProdotto;
     }
 
+    /**
+     * Restituisce l'immagine del prodotto.
+     *
+     * @return l'immagine del prodotto
+     */
     public BufferedImage getImage() {
         return immagine;
     }
 
+    /**
+     * Restituisce il nome del prodotto.
+     *
+     * @return il nome del prodotto
+     */
     public String getNome() {
         return nome;
     }
 
+    /**
+     * Restituisce la quantità del prodotto.
+     *
+     * @return la quantità del prodotto
+     */
     public int getQuantita() {
         return quantita;
     }
 
+     /**
+     * Incrementa la quantità del prodotto di 1.
+     */
     public void incrementaQuantita() {
         quantita++;
     }
 
+    /**
+     * Decrementa la quantità del prodotto di 1, ma solo se la quantità è maggiore di 0.
+     */
     public void decrementaQuantita() {
         if (quantita > 0) {
             quantita--;
         }
     }
 
+    /**
+     * Disegna la barra di progresso per il prodotto.
+     *
+     * @param g2d il contesto grafico su cui disegnare la barra
+     */
     public void disegnaProgressBar(Graphics2D g2d) {
         int progressBarWidth = PanificioFrame.getWidthFrame() / 4;
         int progressBarHeight = 20;
@@ -204,6 +315,17 @@ public class Prodotto extends JComponent implements Runnable, MouseListener, Mou
 
     }
 
+    /**
+     * Crea e avvia un thread per gestire la barra di progresso, che decrementa il valore da 100 a 0 in base al tempo dato in secondi.
+     * La barra di progresso rappresenta un conto alla rovescia che si completa entro il numero di secondi specificato.
+     * 
+     * @param secondi Il numero di secondi per cui la progress bar deve eseguire il conto alla rovescia.
+     *                La durata totale della progress bar verrà suddivisa in 100 passaggi, ognuno corrispondente a un valore 
+     *                della barra di progresso.
+     * 
+     * @return Il thread che esegue il decremento della barra di progresso. Questo thread può essere utilizzato per effettuare
+     *         un join() nel metodo che lo chiama, per sincronizzare l'esecuzione.
+     */
     private Thread createAndStartDecrementThread(int secondi) {
 
         // Crea un thread per la barra di progresso da 100 a 0.

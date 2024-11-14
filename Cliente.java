@@ -4,6 +4,28 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Random;
 
+/**
+ * La classe Cliente rappresenta un cliente all'interno di un gioco di
+ * panificio.
+ * Il cliente entra nel panificio, si posiziona davanti al bancone, mostra
+ * l'immagine del prodotto desiderato
+ * e attende che il panettiere gli venda il prodotto richiesto. Se il prodotto
+ * viene venduto,
+ * il cliente è soddisfatto e lascia il panificio.
+ *
+ * Ogni cliente è rappresentato graficamente con un'immagine e una barra di
+ * progresso
+ * che si decrementa nel tempo mentre il cliente aspetta. Se la barra di
+ * progresso raggiunge
+ * zero, il cliente potrebbe andarsene insoddisfatto.
+ *
+ * La classe utilizza thread per gestire il movimento e l'attesa del cliente,
+ * oltre a utilizzare la classe PanificioMonitor per controllare l'ingresso e
+ * l'uscita dei clienti,
+ * assicurando che solo un cliente possa entrare alla volta.
+ *
+ * @author Gruppo7
+ */
 public class Cliente implements Runnable {
     private int clienteX;
     private final int clienteY;
@@ -42,6 +64,15 @@ public class Cliente implements Runnable {
 
     private final GestioneAudio clienteArrivato;
 
+    /**
+     * Costruttore della classe Cliente.
+     *
+     * @param imgCliente       Immagine del cliente.
+     * @param panificioMonitor Monitor del panificio per gestire l'ingresso e uscita
+     *                         dei clienti.
+     * @param nome             Nome del cliente.
+     * @param prodotti         Lista dei prodotti disponibili.
+     */
     public Cliente(BufferedImage imgCliente, PanificioMonitor panificioMonitor, String nome,
             ArrayList<Prodotto> prodotti) {
         this.panificioMonitor = panificioMonitor;
@@ -77,6 +108,9 @@ public class Cliente implements Runnable {
         clienteArrivato.setVolume(0.5f);
     }
 
+    /**
+     * Metodo run() per il thread del cliente, gestisce il movimento e l'attesa.
+     */
     @Override
     public void run() {
         while (running) {
@@ -97,6 +131,9 @@ public class Cliente implements Runnable {
         }
     }
 
+    /**
+     * Avvia il thread del cliente.
+     */
     public synchronized void start() {
         if (clienteThread == null || !clienteThread.isAlive()) {
             clienteThread = new Thread(this);
@@ -104,6 +141,9 @@ public class Cliente implements Runnable {
         }
     }
 
+    /**
+     * Ferma il thread del cliente.
+     */
     public synchronized void stop() {
         running = false;
         if (clienteThread != null) {
@@ -111,6 +151,11 @@ public class Cliente implements Runnable {
         }
     }
 
+    /**
+     * Disegna l'immagine del cliente sulla GUI.
+     *
+     * @param g2d Graphics2D oggetto per il disegno.
+     */
     public void disegnaCliente(Graphics2D g2d) {
         if (imgCliente != null) {
             AffineTransform originalTransform = g2d.getTransform();
@@ -125,10 +170,20 @@ public class Cliente implements Runnable {
         }
     }
 
+    /**
+     * Seleziona un prodotto desiderato casuale per il cliente.
+     *
+     * @return Il prodotto desiderato dal cliente.
+     */
     private Prodotto scegliProdottoDesiderato() {
         return prodotti.get(rand.nextInt(prodotti.size())); // Scegli un prodotto casuale
     }
 
+    /**
+     * Disegna la nuvola sopra il cliente quando è al centro del bancone.
+     *
+     * @param g2d Graphics2D oggetto per il disegno.
+     */
     public void disegnaNuvola(Graphics2D g2d) {
         if (nuvola != null) {
             if (clienteX >= centroBancone && clienteX <= centroBancone + width) {
@@ -140,6 +195,11 @@ public class Cliente implements Runnable {
         }
     }
 
+    /**
+     * Disegna l'immagine del prodotto desiderato accanto al cliente.
+     *
+     * @param g2d Graphics2D oggetto per il disegno.
+     */
     public void disegnaProdottoDesiderato(Graphics2D g2d) {
         // Disegna il prodotto desiderato solo se il cliente è al centro del bancone
         if (prodottoDesiderato != null && clienteX >= centroBancone && clienteX <= centroBancone + width) {
@@ -149,6 +209,11 @@ public class Cliente implements Runnable {
         }
     }
 
+    /**
+     * Disegna la barra di progresso dell'attesa del cliente.
+     *
+     * @param g2d Graphics2D oggetto per il disegno.
+     */
     public void disegnaProgressBar(Graphics2D g2d) {
         int progressBarWidth = width;
         int progressBarHeight = 20;
@@ -173,6 +238,12 @@ public class Cliente implements Runnable {
 
     }
 
+    /**
+     * Crea e avvia un thread per decrementare la barra di progresso.
+     *
+     * @param secondi Tempo di attesa in secondi.
+     * @return Il thread creato.
+     */
     private Thread createAndStartDecrementThread(int secondi) {
 
         // Crea un thread per la barra di progresso da 100 a 0.
@@ -209,6 +280,9 @@ public class Cliente implements Runnable {
         return progressBarThread;
     }
 
+    /**
+     * Gestisce l'ingresso del cliente nel panificio.
+     */
     public void entraCliente() {
         movimentoSinistra = false;
 
@@ -225,6 +299,9 @@ public class Cliente implements Runnable {
 
     }
 
+    /**
+     * Gestisce l'uscita del cliente dal panificio.
+     */
     public void esceCliente() {
         movimentoSinistra = true;
         // Il cliente si muove verso l'esterno del panificio
@@ -245,46 +322,101 @@ public class Cliente implements Runnable {
         stop();
     }
 
+    /**
+     * Controlla se il cliente sta aspettando.
+     *
+     * @return true se il cliente è in attesa, false altrimenti.
+     */
     public boolean isClienteAspetta() {
         return clienteAspetta;
     }
 
+    /**
+     * Verifica se un cliente è già entrato nel panificio.
+     *
+     * @return true se un cliente è entrato, false altrimenti.
+     */
     public static boolean isClienteEntrato() {
         return clienteEntrato;
     }
 
+    /**
+     * Controlla se il cliente è soddisfatto.
+     *
+     * @return true se il cliente è soddisfatto, false altrimenti.
+     */
     public boolean isSoddisfatto() {
         return soddisfatto;
     }
 
+    /**
+     * Ottiene la posizione X del cliente.
+     *
+     * @return la posizione X del cliente.
+     */
     public int getClienteX() {
         return clienteX;
     }
 
+    /**
+     * Ottiene la posizione Y del cliente.
+     *
+     * @return la posizione Y del cliente.
+     */
     public int getClienteY() {
         return clienteY;
     }
 
+    /**
+     * Ottiene la larghezza del cliente.
+     *
+     * @return la larghezza del cliente.
+     */
     public int getWidth() {
         return width;
     }
 
+    /**
+     * Ottiene l'altezza del cliente.
+     *
+     * @return l'altezza del cliente.
+     */
     public int getHeight() {
         return height;
     }
 
+    /**
+     * Ottiene il nome del cliente.
+     *
+     * @return il nome del cliente.
+     */
     public String getNome() {
         return nome;
     }
 
+    /**
+     * Ottiene il prodotto desiderato dal cliente.
+     *
+     * @return il prodotto desiderato dal cliente.
+     */
     public Prodotto getProdottoDesiderato() {
         return prodottoDesiderato;
     }
 
+    /**
+     * Imposta lo stato di soddisfazione del cliente.
+     *
+     * @param stato true se il cliente è soddisfatto, false altrimenti.
+     */
     public void setSoddisfatto(boolean stato) {
         this.soddisfatto = stato;
     }
 
+    /**
+     * Imposta lo stato di acquisto del prodotto per il cliente.
+     *
+     * @param stato true se il prodotto è stato acquistato, false altrimenti.
+     */
     public void setProdottoComprato(boolean stato) {
         this.prodottoComprato = stato;
     }

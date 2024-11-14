@@ -7,10 +7,23 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import javax.swing.JPanel;
 
+/**
+ * La classe DynamicCursor gestisce la personalizzazione e il comportamento
+ * dinamico
+ * del cursore del mouse in base all'interazione con vari componenti del gioco
+ * "Panificio".
+ * 
+ * @author Gruppo7
+ */
 public class DynamicCursor {
 
     private static Cursor defaultCursor, selectCursor, transparentSelectCursor;
 
+    /**
+     * Imposta i cursori personalizzati per il pannello specificato.
+     * 
+     * @param panello il JPanel su cui impostare i cursori personalizzati.
+     */
     public static void setCustomCursors(JPanel panello) {
         BufferedImage defaultCursorImage = ImageLoader.loadImage("img/default_cursor.png");
         BufferedImage selectCursorImage = ImageLoader.loadImage("img/select_cursor.png");
@@ -33,7 +46,16 @@ public class DynamicCursor {
         panello.setCursor(defaultCursor);
     }
 
-    // Metodo UpdateCursor per "Panificio"
+    /**
+     * Aggiorna il cursore in base alla posizione del mouse e dell'intersezione del
+     * panettiere
+     * con l'area del bancone o della porta nel pannello "Panificio".
+     * 
+     * @param panello          il JPanel su cui aggiornare il cursore.
+     * @param panettiereBounds i confini del panettiere.
+     * @param banconeBounds    i confini del bancone.
+     * @param portaBounds      i confini della porta.
+     */
     public static void updateCursor(JPanel panello, Rectangle panettiereBounds, Rectangle banconeBounds,
             Rectangle portaBounds) {
         Point mousePosition = panello.getMousePosition();
@@ -55,7 +77,16 @@ public class DynamicCursor {
         }
     }
 
-    // Metodo UpdateCursor per "Bancone"
+    /**
+     * Aggiorna il cursore in base alla posizione del mouse nel pannello "Bancone",
+     * considerando le aree del pulsante Indietro, dei prodotti e del pulsante
+     * Forno.
+     * 
+     * @param panello           il JPanel su cui aggiornare il cursore.
+     * @param btnIndietroBounds i confini del pulsante Indietro.
+     * @param btnFornoBounds    i confini del pulsante Forno.
+     * @param prodottiBounds    lista dei confini dei prodotti.
+     */
     public static void updateCursor(JPanel panello, Rectangle btnIndietroBounds, Rectangle btnFornoBounds,
             ArrayList<Rectangle> prodottiBounds) {
         Point mousePosition = panello.getMousePosition();
@@ -100,7 +131,18 @@ public class DynamicCursor {
         }
     }
 
-    // Metodo UpdateCursor per "Forno"
+    /**
+     * Aggiorna il cursore in base alla posizione del mouse nel pannello "Forno",
+     * considerando le aree del pulsante Bancone, dei nuovi prodotti, degli
+     * ingredienti
+     * e del libro delle ricette.
+     * 
+     * @param panello             il JPanel su cui aggiornare il cursore.
+     * @param btnBanconeBounds    i confini del pulsante Bancone.
+     * @param ingredientiBounds   lista dei confini degli ingredienti.
+     * @param nuovoProdottoBounds i confini del nuovo prodotto.
+     * @param libroRicetteBounds  i confini del libro delle ricette.
+     */
     public static void updateCursor(JPanel panello, Rectangle btnBanconeBounds,
             ArrayList<Rectangle> ingredientiBounds, Rectangle nuovoProdottoBounds, Rectangle libroRicetteBounds) {
         Point mousePosition = panello.getMousePosition();
@@ -144,11 +186,26 @@ public class DynamicCursor {
         }
     }
 
+    /**
+     * Verifica se il panettiere si trova all'interno dei confini specificati.
+     * 
+     * @param panettiereBounds i confini del panettiere.
+     * @param bounds           i confini da controllare.
+     * @return true se il panettiere interseca i confini specificati, false
+     *         altrimenti.
+     */
     public static boolean isPanettiereIntersectsBounds(Rectangle panettiereBounds, Rectangle bounds) {
         panettiereBounds = Panettiere.getPanettiereBounds();
         return panettiereBounds != null && panettiereBounds.intersects(bounds);
     }
 
+    /**
+     * Verifica se il mouse si trova all'interno dei confini specificati.
+     * 
+     * @param mousePoint la posizione del mouse.
+     * @param bounds     i confini da controllare.
+     * @return true se il mouse si trova all'interno dei confini, false altrimenti.
+     */
     public static boolean isMouseOverBounds(Point mousePoint, Rectangle bounds) {
         if (bounds != null) {
             return bounds.contains(mousePoint);
@@ -156,6 +213,16 @@ public class DynamicCursor {
         return false;
     }
 
+    /**
+     * Verifica se il mouse si trova all'interno di uno qualsiasi dei confini
+     * specificati
+     * in una lista di prodotti.
+     * 
+     * @param mousePoint     la posizione del mouse.
+     * @param prodottiBounds lista dei confini dei prodotti.
+     * @return true se il mouse si trova all'interno di uno dei confini, false
+     *         altrimenti.
+     */
     private static boolean isMouseOverArrayBounds(Point mousePoint, ArrayList<Rectangle> prodottiBounds) {
         for (int i = 0; i < prodottiBounds.size(); i++) {
             if (prodottiBounds.get(i).contains(mousePoint)) {
